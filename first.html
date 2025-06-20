@@ -174,13 +174,9 @@
       btn.onclick = async () => {
         const tg = window.Telegram.WebApp;
         const userId = tg.initDataUnsafe?.user?.id;
-
-        if (!userId) {
-          console.error('Ошибка: не удалось получить user_id');
-          return;
-        }
+        if (!userId) return;
         try {
-          btn.disabled = true; // Блокируем кнопку, чтобы избежать повторных нажатий
+          btn.disabled = true;
           const response = await fetch('https://shy-scene-5215.minuales.workers.dev/claim-bonus', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -188,15 +184,14 @@
           });
           const result = await response.json();
           if (result.success) {
-            // Отправляем боту сигнал, что бонус получен, для перехода на следующий шаг
-            tg.sendData(JSON.stringify({ event: 'bonus_claimed' }));
-            // Mini App закроется автоматически после вызова sendData
+            // Вместо sendData, просто перезагружаем страницу с параметром
+            window.location.href = window.location.pathname + "?event=bonus_claimed";
+            // И закрываем приложение
+            tg.close();
           } else {
-            console.error('Ошибка от сервера: ' + result.error);
             btn.disabled = false;
           }
         } catch (err) {
-          console.error('Ошибка при отправке: ' + err.message);
           btn.disabled = false;
         }
       };
