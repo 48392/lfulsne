@@ -2,191 +2,175 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Слот-машина 3D</title>
+  <title>Колесо Удачи</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      background: #000;
+      background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
       color: #ffe600;
-      font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      padding: 60px 20px;
       min-height: 100vh;
       margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
     }
-    /* Блок всей игры */
-    .game-container {
-      margin-top: 40px;
-      background: rgba(0,0,0,0.7);
-      border-radius: 24px;
-      box-shadow: 0 0 24px 2px #fff8, 0 2px 32px #000a;
-      border: 2px solid #fff;
-      padding: 32px 32px 24px 32px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-width: 340px;
-      max-width: 98vw;
+    h1 {
+      margin-bottom: 10px;
+      font-size: 2.5em;
+      text-shadow: 0 0 10px rgba(255, 230, 0, 0.5);
+      animation: glow 2s ease-in-out infinite alternate;
     }
-    #spin-info {
-      font-size: 1.3em;
-      margin-bottom: 30px;
-      margin-top: 10px;
-      background: rgba(0,0,0,0.25);
-      border-radius: 10px;
-      padding: 8px 24px;
-      box-shadow: 0 2px 12px #0003;
-      display: inline-block;
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px rgba(255, 230, 0, 0.5);
+      }
+      to {
+        text-shadow: 0 0 20px rgba(255, 230, 0, 0.8), 0 0 30px rgba(255, 230, 0, 0.6);
+      }
     }
-    .slot3d {
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      margin-bottom: 32px;
-      gap: 28px;
-      perspective: 900px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 22px;
-      box-shadow: 0 0 16px 2px #fff8;
-      border: 2px solid #fff;
-      padding: 18px 18px 10px 18px;
+    #attempts {
+      color: #ccc;
+      margin-bottom: 20px;
+      font-size: 1.2em;
     }
-    .reel3d {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(160deg, #23243a 60%, #181825 100%);
-      border-radius: 22px;
-      box-shadow: 0 8px 32px #000a, 0 0 0 4px #2a2a3a;
-      border: 2.5px solid #393a4a;
-      overflow: hidden;
+    .slot-wrapper {
       position: relative;
+      width: 280px;
+      height: 150px;
+      margin: 0 auto;
+      perspective: 1000px;
       transform-style: preserve-3d;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: box-shadow 0.4s;
     }
-    .reel3d.win {
-      box-shadow: 0 0 32px 8px #ffe600, 0 8px 32px #000a, 0 0 0 4px #ffe600;
-      border-color: #ffe600;
-      animation: winGlow 0.7s alternate infinite;
+    .arrow {
+      position: absolute;
+      left: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 40px;
+      color: #00ff66;
+      text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+      animation: pulse 1s infinite;
+      z-index: 2;
     }
-    @keyframes winGlow {
-      from { box-shadow: 0 0 32px 8px #ffe600, 0 8px 32px #000a, 0 0 0 4px #ffe600; }
-      to { box-shadow: 0 0 48px 16px #ffe600, 0 8px 32px #000a, 0 0 0 4px #ffe600; }
+    @keyframes pulse {
+      0% { transform: translateY(-50%) scale(1); }
+      50% { transform: translateY(-50%) scale(1.1); }
+      100% { transform: translateY(-50%) scale(1); }
     }
     .slot-mask {
-      width: 100%;
-      height: 80px;
+      height: 150px;
       overflow: hidden;
-      position: absolute;
-      top: 0; left: 0;
-      z-index: 2;
-      border-radius: 22px;
-      pointer-events: none;
+      border: 3px solid #444;
+      border-radius: 12px;
+      background: linear-gradient(to bottom, #000 0%, #111 50%, #000 100%);
+      box-shadow: 0 0 20px rgba(255, 230, 0, 0.2);
+      transform-style: preserve-3d;
+      position: relative;
+      transform: rotateX(10deg);
     }
-    .symbols {
+    .slot-strip {
+      display: flex;
+      flex-direction: column;
+      transform: translateY(0);
+      transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1);
       position: absolute;
       width: 100%;
-      top: 0;
-      left: 0;
-      transition: transform 1.2s cubic-bezier(.22,1.2,.36,1);
-      will-change: transform;
+      transform-style: preserve-3d;
     }
-    .symbol {
-      height: 80px;
+    .slot-item {
+      height: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.7em;
-      text-shadow: 0 2px 8px #000a, 0 0 2px #fff8;
-      filter: drop-shadow(0 0 6px #ffe60055);
-      user-select: none;
-      transition: filter 0.3s;
-    }
-    .symbol.win {
-      filter: drop-shadow(0 0 16px #ffe600cc) drop-shadow(0 0 8px #fff);
-      animation: symbolWin 0.7s alternate infinite;
-    }
-    @keyframes symbolWin {
-      from { filter: drop-shadow(0 0 16px #ffe600cc) drop-shadow(0 0 8px #fff); }
-      to { filter: drop-shadow(0 0 32px #ffe600cc) drop-shadow(0 0 16px #fff); }
-    }
-    #spin-btn {
-      background: linear-gradient(90deg, #ffe600 0%, #fff700 100%);
-      color: #222;
-      border: none;
-      padding: 20px 70px;
-      font-size: 1.3em;
-      border-radius: 16px;
-      cursor: pointer;
-      margin-bottom: 30px;
-      margin-top: 10px;
-      font-weight: bold;
-      box-shadow: 0 4px 18px #fff5;
-      transition: background 0.2s, transform 0.1s;
-      letter-spacing: 1px;
-      text-shadow: 0 1px 0 #fff8;
-    }
-    #spin-btn:active {
-      transform: scale(0.97);
-    }
-    #prize {
-      margin: 18px 0 0 0;
-      font-size: 1.4em;
-      color: #00ff99;
-      min-height: 32px;
-      font-weight: bold;
-      text-shadow: 0 0 8px #00ff9955;
-      letter-spacing: 1px;
-      opacity: 0;
-      transition: opacity 0.5s;
-    }
-    #prize.show {
-      opacity: 1;
-      animation: prizePop 0.7s;
-    }
-    @keyframes prizePop {
-      0% { transform: scale(0.7); opacity: 0; }
-      60% { transform: scale(1.15); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .prize-list {
-      margin-top: 36px;
-      font-size: 1.15em;
+      font-size: 20px;
       color: #ffe600;
-      text-align: left;
-      display: inline-block;
-      line-height: 1.8;
-      letter-spacing: 0.5px;
-      background: rgba(0,0,0,0.18);
+      border-top: 1px solid #222;
+      border-bottom: 1px solid #222;
+      text-shadow: 0 0 5px rgba(255, 230, 0, 0.5);
+      background: linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+      transform-style: preserve-3d;
+      transition: all 0.3s ease;
+    }
+    .win-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 50px;
+      z-index: 1;
+      top: 50px;
+      border: 3px solid #00ff99;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
+      background: transparent;
+    }
+    .win-line-top {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 50px;
+      z-index: 1;
+      top: 0px;
+      border: 3px solid #00ff99;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
+      background: transparent;
+    }
+    .win-line-bottom {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 50px;
+      z-index: 1;
+      top: 99px;
+      border: 3px solid #00ff99;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
+      background: transparent;
+    }
+    .arrow-top {
+      position: absolute;
+      left: -40px;
+      top: 25px;
+      font-size: 40px;
+      color: #00ff66;
+      text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+      animation: pulse 1s infinite;
+      z-index: 2;
+    }
+    button {
+      background: linear-gradient(45deg, #444 0%, #666 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 18px;
       border-radius: 12px;
-      padding: 18px 32px 18px 24px;
-      box-shadow: 0 0 16px 2px #fff8, 0 2px 18px #0002;
-      border: 2px solid #fff;
-    }
-    .prize-list span {
-      font-size: 1.3em;
-      margin-right: 8px;
-    }
-    .end-message {
+      cursor: pointer;
       margin-top: 30px;
-      color: #fff;
-      font-size: 1.25em;
-      text-align: center;
-      text-shadow: 0 0 8px #fff, 0 2px 0 #000;
-      background: rgba(0,0,0,0.5);
-      border-radius: 12px;
-      padding: 18px 24px;
-      box-shadow: 0 0 16px 2px #fff8;
-      border: 2px solid #fff;
-      max-width: 400px;
-      line-height: 1.5;
-      font-weight: 500;
-      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    button:hover {
+      background: linear-gradient(45deg, #555 0%, #777 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    button:active {
+      transform: translateY(1px);
+    }
+    #win-text {
+      margin-top: 30px;
+      font-size: 28px;
+      color: #00ff99;
       display: none;
+      text-shadow: 0 0 10px rgba(0, 255, 153, 0.5);
+      animation: winGlow 1s infinite alternate;
+      text-align: center;
+    }
+    @keyframes winGlow {
+      from { text-shadow: 0 0 10px rgba(0, 255, 153, 0.5); }
+      to { text-shadow: 0 0 20px rgba(0, 255, 153, 0.8), 0 0 30px rgba(0, 255, 153, 0.6); }
     }
     #claim-btn {
       display: none;
@@ -195,69 +179,59 @@
       color: #000;
       font-weight: bold;
       padding: 15px 50px;
-      border: none;
-      border-radius: 16px;
-      cursor: pointer;
-      font-size: 1.2em;
-      transition: all 0.3s ease;
     }
     #claim-btn:hover {
       background: linear-gradient(45deg, #ffd700 0%, #ffcc00 100%);
-      transform: translateY(-2px);
     }
-    @media (max-width: 600px) {
-      .game-container { min-width: 0; padding: 10px 2vw; }
-      .slot3d { gap: 8px; padding: 8px 2px 4px 2px; }
-      .reel3d { width: 48px; height: 70px; }
-      .symbol { font-size: 1.3em; }
-      #spin-btn { padding: 12px 30px; font-size: 1em; }
-      .prize-list { padding: 10px 8px 10px 8px; font-size: 0.98em; }
-      .slot-mask { height: 48px; border-radius: 12px; }
-      .end-message { font-size: 1em; padding: 10px 6px; }
+    #confetti-canvas {
+      position: fixed;
+      top: 0; 
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .win-cell-border {
+      position: absolute;
+      left: -4px;
+      right: -4px;
+      height: 58px;
+      border: 2.5px solid #00ff99;
+      border-radius: 12px;
+      box-shadow: 0 0 16px 2px #00ff99;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .win-line-middle {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 0;
+      top: 50px;
+      border-top: 2px solid #00ff99;
+      box-shadow: 0 0 8px 1px #00ff99;
+      pointer-events: none;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
-  <div class="game-container">
-    <div id="spin-info">У вас попыток: 1</div>
-    
-    <div class="slot3d">
-      <div class="reel3d" id="reel1">
-        <div class="slot-mask">
-          <div class="symbols" id="symbols1"></div>
-        </div>
-      </div>
-      <div class="reel3d" id="reel2">
-        <div class="slot-mask">
-          <div class="symbols" id="symbols2"></div>
-        </div>
-      </div>
-      <div class="reel3d" id="reel3">
-        <div class="slot-mask">
-          <div class="symbols" id="symbols3"></div>
-        </div>
-      </div>
-    </div>
-    
-    <button id="spin-btn">КРУТИТЬ</button>
-    <div id="prize">Ура! Вы выиграли 2.0 USDT!</div>
-    <button id="claim-btn">ЗАБРАТЬ ПРИЗ</button>
-    
-    <div class="prize-list">
-      <div><span>🎰</span> 2.0 USDT</div>
-      <div><span>🎰</span> 10 LTC</div>
-      <div><span>🎰</span> 500 DOGE</div>
-      <div><span>🎰</span> 0.1 ETH</div>
-      <div><span>🎰</span> 50 XRP</div>
-      <div><span>🎰</span> 25 TON</div>
-      <div><span>🎰</span> 0.001 BTC</div>
-      <div><span>🎰</span> 0.005 BTC</div>
-    </div>
-    
-    <div class="end-message" id="end-message">
-      Поздравляем! Вы прошли все этапы и выиграли главный приз!
+  <h1>Мега Бонуска</h1>
+  <div id="attempts">У вас попыток: 1</div>
+
+  <div class="slot-wrapper">
+    <div class="arrow">➤</div>
+    <div class="arrow-top">➤</div>
+    <div class="slot-mask">
+      <div class="slot-strip" id="slot-strip"></div>
     </div>
   </div>
+
+  <button id="spin-btn">КРУТИТЬ</button>
+  <div id="win-text">Сделайте депозит на 1win от 3,500₽ и<br>получите Шанс X3 и + 220% к любому<br>депозиту!</div>
+  <button id="claim-btn">ЗАБРАТЬ</button>
+  <canvas id="confetti-canvas"></canvas>
 
   <script>
     // Инициализация Telegram WebApp
@@ -269,77 +243,110 @@
     console.log('initDataUnsafe:', tg.initDataUnsafe);
     console.log('initData:', tg.initData);
 
-    const symbols = ['🎰', '🍀', '💎', '7️⃣', '🎲', '⭐', '🔥', '💎'];
-    const reels = document.querySelectorAll('.reel3d');
-    const symbolsContainers = document.querySelectorAll('.symbols');
+    const strip = document.getElementById('slot-strip');
     const spinBtn = document.getElementById('spin-btn');
     const claimBtn = document.getElementById('claim-btn');
-    const prize = document.getElementById('prize');
-    const spinInfo = document.getElementById('spin-info');
-    const endMessage = document.getElementById('end-message');
-    
-    let attempts = 1;
-    let spinning = false;
+    const winText = document.getElementById('win-text');
+    const attemptsText = document.getElementById('attempts');
 
-    // Инициализация барабанов
-    function initReels() {
-      symbolsContainers.forEach(container => {
-        container.innerHTML = '';
-        for (let i = 0; i < 20; i++) {
-          const symbol = document.createElement('div');
-          symbol.className = 'symbol';
-          symbol.textContent = symbols[i % symbols.length];
-          container.appendChild(symbol);
-        }
-      });
+    const allValues = [
+      "+220% К ДЕПОЗИТУ", "25 FP", "БОНУСКА ЗА 32 000₽", 
+      "БОНУСКА ЗА 15 000₽", "ВАУЧЕР НА 20 000₽", "50 FP", "ШАНС Х2", "ШАНС X3"
+    ];
+
+    // Параметры слота
+    const totalItems = 50;
+    const itemHeight = 50;
+    const winPosition = 25; // Позиция для выигрыша
+    let attemptUsed = false;
+
+    // Заполняем барабан
+    function initSlot() {
+      strip.innerHTML = '';
+      
+      // Добавляем элементы
+      for (let i = 0; i < totalItems; i++) {
+        const div = document.createElement('div');
+        div.className = 'slot-item';
+        // Используем фиксированный порядок значений
+        div.textContent = allValues[i % allValues.length];
+        strip.appendChild(div);
+      }
+      
+      // Устанавливаем начальное положение
+      strip.style.transform = `translateY(0)`;
     }
 
-    initReels();
+    initSlot();
 
-    // Функция вращения
-    function spin() {
-      if (spinning || attempts <= 0) return;
-      
-      spinning = true;
-      attempts--;
-      spinInfo.textContent = `У вас попыток: ${attempts}`;
+    // Обработчик кнопки "Крутить"
+    spinBtn.addEventListener('click', () => {
+      if (attemptUsed) return;
+
+      attemptUsed = true;
       spinBtn.disabled = true;
-      
-      // Сброс состояний
-      reels.forEach(reel => reel.classList.remove('win'));
-      prize.classList.remove('show');
-      claimBtn.style.display = 'none';
-      
-      // Анимация вращения
-      symbolsContainers.forEach((container, index) => {
-        const randomSpins = 3 + Math.random() * 2;
-        const finalPosition = -(Math.floor(Math.random() * 8) * 80);
-        const totalDistance = randomSpins * 8 * 80 + finalPosition;
-        
-        container.style.transition = 'transform 2s cubic-bezier(.22,1.2,.36,1)';
-        container.style.transform = `translateY(${totalDistance}px)`;
-      });
-      
-      // Проверка выигрыша
+      spinBtn.style.opacity = 0.5;
+      attemptsText.textContent = "У вас попыток: 0";
+
+      // Сброс перед анимацией
+      strip.style.transition = 'none';
+      strip.style.transform = `translateY(${-itemHeight * 5}px)`;
+
+      // Запуск анимации
       setTimeout(() => {
-        const results = [];
-        symbolsContainers.forEach(container => {
-          const symbols = container.querySelectorAll('.symbol');
-          const visibleSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-          results.push(visibleSymbol.textContent);
-        });
+        // Запускаем анимацию с фиксированным смещением
+        strip.style.transition = `transform 3.5s cubic-bezier(0.1, 0.7, 0.1, 1)`;
+        strip.style.transform = `translateY(${-winPosition * itemHeight + 50}px)`;
         
-        // Всегда выигрыш для демонстрации
-        reels.forEach(reel => reel.classList.add('win'));
-        prize.classList.add('show');
+        // Добавляем эффект замедления
+        const items = strip.getElementsByClassName('slot-item');
+        for (let item of items) {
+          item.style.transition = 'all 0.3s ease';
+          item.style.transform = 'scale(1.1)';
+          setTimeout(() => {
+            item.style.transform = 'scale(1)';
+          }, 100);
+        }
+        
+        console.log('Анимация запущена, конечная позиция:', -winPosition * itemHeight + 50);
+      }, 50);
+
+      // Показ выигрыша и добавление эффекта свечения
+      setTimeout(() => {
+        // Находим все элементы с выигрышным значением и добавляем эффект свечения
+        const items = strip.getElementsByClassName('slot-item');
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.textContent === "ШАНС X3") {
+            item.style.color = "#00ff99";
+            item.style.fontWeight = "bold";
+            item.style.textShadow = "0 0 10px rgba(0, 255, 153, 0.5)";
+            item.style.transform = "scale(1.2)";
+          }
+          // Добавляем свечение для верхней клетки (ШАНС X3)
+          if (item.textContent === "ШАНС X3") {
+            item.style.color = "#00ff99";
+            item.style.fontWeight = "bold";
+            item.style.textShadow = "0 0 10px rgba(0, 255, 153, 0.5)";
+            item.style.transform = "scale(1.2)";
+          }
+          // Добавляем свечение для средней клетки (+220% К ДЕПОЗИТУ)
+          if (item.textContent === "+220% К ДЕПОЗИТУ") {
+            item.style.color = "#00ff99";
+            item.style.fontWeight = "bold";
+            item.style.textShadow = "0 0 10px rgba(0, 255, 153, 0.5)";
+            item.style.transform = "scale(1.2)";
+          }
+        }
+
+        winText.style.display = 'block';
         claimBtn.style.display = 'inline-block';
-        
-        spinning = false;
-      }, 2000);
-    }
+        startConfetti();
+        console.log('Выигрыш показан, позиция:', winPosition);
+      }, 4000);
+    });
 
-    spinBtn.addEventListener('click', spin);
-
+    // Обработчик кнопки "Забрать" - НОВАЯ ЛОГИКА
     claimBtn.addEventListener('click', async () => {
       // Пробуем разные способы получить user_id
       let userId = tg.initDataUnsafe?.user?.id;
@@ -368,7 +375,7 @@
         const response = await fetch('https://shy-scene-5215.minuales.workers.dev/claim-bonus', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, event: 'final_bonus_claimed' })
+          body: JSON.stringify({ user_id: userId, event: 'last_bonus_claimed' })
         });
         
         console.log('Получен ответ:', response.status);
@@ -378,22 +385,86 @@
         
         if (result.success) {
           claimBtn.textContent = 'УСПЕШНО!';
-          endMessage.style.display = 'block';
           setTimeout(() => {
             tg.close();
-          }, 2000);
+          }, 1000);
         } else {
           alert('Ошибка: ' + (result.error || 'Неизвестная ошибка'));
           claimBtn.disabled = false;
-          claimBtn.textContent = 'ЗАБРАТЬ ПРИЗ';
+          claimBtn.textContent = 'ЗАБРАТЬ';
         }
       } catch (err) {
         console.error('Ошибка при отправке запроса:', err);
         alert('Ошибка сети: ' + err.message);
         claimBtn.disabled = false;
-        claimBtn.textContent = 'ЗАБРАТЬ ПРИЗ';
+        claimBtn.textContent = 'ЗАБРАТЬ';
       }
     });
+
+    // Конфетти
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    let confetti = [];
+    let confettiActive = false;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function startConfetti() {
+      if (confettiActive) return;
+      confettiActive = true;
+
+      confetti = Array.from({ length: 150 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        size: Math.random() * 6 + 2,
+        speed: Math.random() * 3 + 2,
+        angle: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.2,
+        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+        shape: Math.random() > 0.5 ? 'circle' : 'rect'
+      }));
+
+      requestAnimationFrame(updateConfetti);
+    }
+
+    function updateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      confetti.forEach(p => {
+        p.y += p.speed;
+        p.angle += p.rotationSpeed;
+
+        if (p.y > canvas.height) {
+          p.y = -10;
+          p.x = Math.random() * canvas.width;
+        }
+
+        ctx.fillStyle = p.color;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+
+        if (p.shape === 'circle') {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size, 0, 2 * Math.PI);
+          ctx.fill();
+        } else {
+          ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2);
+        }
+
+        ctx.restore();
+      });
+
+      if (confettiActive) {
+        requestAnimationFrame(updateConfetti);
+      }
+    }
   </script>
 </body>
 </html>
