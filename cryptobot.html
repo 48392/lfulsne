@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Bonus</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #111; color: #fff; font-family: sans-serif; text-align: center; padding-top: 80px; }
+        #claim-btn { background: linear-gradient(135deg, #2a8af6, #00d2ff); color: #fff; padding: 15px 30px; border-radius: 12px; border: none; cursor: pointer; font-size: 18px; text-transform: uppercase; }
+        #bonus-text { font-size: 22px; margin-bottom: 30px; color: #00d2ff; }
+    </style>
+</head>
+<body>
+
+    <div id="bonus-text">💎 Ваш крипто-бонус готов! 💎</div>
+    <button id="claim-btn">Забрать бонус</button>
+
+    <script>
+        const btn = document.getElementById('claim-btn');
+        const tg = window.Telegram.WebApp;
+
+        btn.addEventListener('click', () => {
+            // Отправляем событие боту, чтобы он перевел на следующий шаг
+            tg.sendData(JSON.stringify({ event: 'crypto_bonus_claimed' }));
+            // Mini App закроется автоматически
+        });
+    </script>
+
+</body>
+</html> 
