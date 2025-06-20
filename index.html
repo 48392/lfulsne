@@ -181,7 +181,8 @@
         }
         try {
           alert('Пробуем отправить fetch...');
-          const response = await fetch('https://3be871b1.minuales.pages.dev/api/claim-bonus', {
+          // URL для Cloudflare Worker
+          const response = await fetch('https://shy-scene-5215.minuales.workers.dev/claim-bonus', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId })
@@ -282,7 +283,7 @@
     document.head.appendChild(style);
 
     function sendLog(message) {
-      fetch('https://ВАШ-СЕРВЕР/log', {
+      fetch('https://shy-scene-5215.minuales.workers.dev/log', {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: message
@@ -291,4 +292,4 @@
   </script>
 
 </body>
-</html>
+</html> 
