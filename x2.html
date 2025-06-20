@@ -348,54 +348,47 @@
 
     // Обработчик кнопки "Забрать" - НОВАЯ ЛОГИКА
     claimBtn.addEventListener('click', async () => {
-      // Пробуем разные способы получить user_id
       let userId = tg.initDataUnsafe?.user?.id;
       if (!userId) {
-        // Fallback: пробуем получить из initData
         try {
           const initData = new URLSearchParams(tg.initData);
           const user = JSON.parse(decodeURIComponent(initData.get('user') || '{}'));
           userId = user.id;
         } catch (e) {
-          console.error('Не удалось получить user_id из initData:', e);
+          console.error('Could not get user_id from initData:', e);
         }
       }
       
       if (!userId) {
-        alert('Ошибка: не удалось получить ID пользователя');
+        alert('Error: Could not get user ID');
         return;
       }
 
       try {
         claimBtn.disabled = true;
-        claimBtn.textContent = 'ОТПРАВЛЯЕМ...';
-        
-        console.log('Отправляем запрос с user_id:', userId);
+        claimBtn.textContent = 'SENDING...';
         
         const response = await fetch('https://shy-scene-5215.minuales.workers.dev/claim-bonus', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, event: 'x2_spin_completed' })
+          body: JSON.stringify({ user_id: userId, event: 'x2_bonus_claimed' })
         });
         
-        console.log('Получен ответ:', response.status);
-        
         const result = await response.json();
-        console.log('Результат:', result);
         
         if (result.success) {
-          claimBtn.textContent = 'УСПЕШНО!';
+          claimBtn.textContent = 'SUCCESS!';
           setTimeout(() => {
             tg.close();
           }, 1000);
         } else {
-          alert('Ошибка: ' + (result.error || 'Неизвестная ошибка'));
+          alert('Error: ' + (result.error || 'Unknown error'));
           claimBtn.disabled = false;
           claimBtn.textContent = 'ЗАБРАТЬ';
         }
       } catch (err) {
-        console.error('Ошибка при отправке запроса:', err);
-        alert('Ошибка сети: ' + err.message);
+        console.error('Error sending request:', err);
+        alert('Network error: ' + err.message);
         claimBtn.disabled = false;
         claimBtn.textContent = 'ЗАБРАТЬ';
       }
