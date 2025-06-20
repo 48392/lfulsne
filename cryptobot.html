@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Крипто Слот</title>
+  <title>Мега Бонуска</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -39,7 +39,6 @@
       height: 150px;
       margin: 0 auto;
       perspective: 1000px;
-      transform-style: preserve-3d;
     }
     .arrow {
       position: absolute;
@@ -50,7 +49,6 @@
       color: #00ff66;
       text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
       animation: pulse 1s infinite;
-      z-index: 2;
     }
     @keyframes pulse {
       0% { transform: translateY(-50%) scale(1); }
@@ -62,11 +60,9 @@
       overflow: hidden;
       border: 3px solid #444;
       border-radius: 12px;
-      background: linear-gradient(to bottom, #000 0%, #111 50%, #000 100%);
+      background: #000;
       box-shadow: 0 0 20px rgba(255, 230, 0, 0.2);
-      transform-style: preserve-3d;
       position: relative;
-      transform: rotateX(10deg);
     }
     .slot-strip {
       display: flex;
@@ -75,21 +71,17 @@
       transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1);
       position: absolute;
       width: 100%;
-      transform-style: preserve-3d;
     }
     .slot-item {
       height: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 24px;
       color: #ffe600;
       border-top: 1px solid #222;
       border-bottom: 1px solid #222;
       text-shadow: 0 0 5px rgba(255, 230, 0, 0.5);
-      background: linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-      transform-style: preserve-3d;
-      transition: all 0.3s ease;
     }
     .win-line {
       position: absolute;
@@ -101,11 +93,6 @@
       z-index: 1;
       top: 50px;
       box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
-      background: linear-gradient(to bottom, 
-        rgba(0, 255, 153, 0.1) 0%,
-        rgba(0, 255, 153, 0) 50%,
-        rgba(0, 255, 153, 0.1) 100%
-      );
     }
     button {
       background: linear-gradient(45deg, #444 0%, #666 100%);
@@ -164,7 +151,7 @@
   </style>
 </head>
 <body>
-  <h1>Крипто Бонуска</h1>
+  <h1>Мега Бонуска</h1>
   <div id="attempts">У вас попыток 1</div>
 
   <div class="slot-wrapper">
@@ -243,12 +230,6 @@
     });
 
     claimBtn.addEventListener('click', () => {
-      // Отправляем данные в бота перед закрытием
-      Telegram.WebApp.sendData(JSON.stringify({
-        action: 'claim_bonus',
-        step: 2,
-        bonus: 'crypto_bonus'
-      }));
       Telegram.WebApp.close();
     });
 
@@ -317,4 +298,4 @@
     }
   </script>
 </body>
-</html> 
+</html>
