@@ -102,7 +102,13 @@ async def get_chain_keyboard(step_idx: int):
 
     # Добавляем кнопку webapp, если она есть
     if 'webapp' in current_step_data:
-        webapp_url = f"https://48392.github.io/lfulsne/{current_step_data['webapp']}"
+        # Для первой миниаппы используем first.html, для остальных — как раньше
+        if current_step_data['webapp'] == 'first.html':
+            cache_buster = f"?v={datetime.datetime.now().timestamp()}"
+            webapp_url = f"https://48392.github.io/lfulsne/first.html{cache_buster}"
+        else:
+            cache_buster = f"?v={datetime.datetime.now().timestamp()}"
+            webapp_url = f"https://48392.github.io/lfulsne/{current_step_data['webapp']}{cache_buster}"
         button_text = current_step_data.get('webapp_button_text', "🎮 Открыть игру")
         ikb.button(text=button_text, web_app=types.WebAppInfo(url=webapp_url))
 
@@ -288,33 +294,40 @@ async def change_referral_message_state(message: types.Message, state: FSMContex
 @router.message(F.web_app_data)
 async def webapp_data_handler(message: types.Message, bot: Bot):
     user_id = message.from_user.id
+    print(f"\n[DEBUG] Получены данные от WebApp от пользователя {user_id}:")
+    print(f"[DEBUG] RAW DATA: {message.web_app_data.data}")
+
     try:
         data = json.loads(message.web_app_data.data)
         event = data.get('event')
+        print(f"[DEBUG] Событие: {event}")
     except (json.JSONDecodeError, AttributeError):
-        # Если данные пришли в неверном формате, ничего не делаем
+        print("[DEBUG] Ошибка: не удалось разобрать JSON или получить событие.")
         return
 
-    # Получаем текущий шаг пользователя из БД
     user = await DataBase.get_user_info(user_id)
-    if not user or user[4] is None: # user[4] - это current_step
+    if not user or user[4] is None:
+        print("[DEBUG] Ошибка: не найден пользователь или его текущий шаг в БД.")
         return
 
     current_step_idx = user[4]
-    
-    # Проверяем, совпадает ли событие с ожидаемым на текущем шаге
+    print(f"[DEBUG] Текущий шаг пользователя: {current_step_idx}")
+
     expected_event = POSTBACK_CHAIN[current_step_idx].get('event_next')
+    print(f"[DEBUG] Ожидаемое событие для этого шага: {expected_event}")
 
     if event and event == expected_event:
-        # Переводим пользователя на следующий шаг
+        print("[DEBUG] УСПЕХ: Событие совпало с ожидаемым. Перевожу на следующий шаг.")
         next_step_idx = current_step_idx + 1
         await DataBase.update_current_step(user_id, next_step_idx)
-        
+
         if next_step_idx < len(POSTBACK_CHAIN):
-            # Отправляем следующее сообщение из цепочки
+            print(f"[DEBUG] Отправляю сообщение для шага {next_step_idx}.")
             await bot.send_message(
                 chat_id=user_id,
                 text=POSTBACK_CHAIN[next_step_idx]['text'],
                 reply_markup=await get_chain_keyboard(next_step_idx),
                 parse_mode="HTML"
             )
+    else:
+        print("[DEBUG] ПРЕДУПРЕЖДЕНИЕ: Полученное событие не совпало с ожидаемым. Ничего не делаю.")
