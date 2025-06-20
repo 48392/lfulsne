@@ -102,13 +102,12 @@ async def get_chain_keyboard(step_idx: int):
 
     # Добавляем кнопку webapp, если она есть
     if 'webapp' in current_step_data:
-        # Для первой миниаппы используем first.html, для остальных — как раньше
-        if current_step_data['webapp'] == 'first.html':
-            cache_buster = f"?v={datetime.datetime.now().timestamp()}"
-            webapp_url = f"https://48392.github.io/lfulsne/first.html{cache_buster}"
-        else:
-            cache_buster = f"?v={datetime.datetime.now().timestamp()}"
-            webapp_url = f"https://48392.github.io/lfulsne/{current_step_data['webapp']}{cache_buster}"
+        # Добавляем кэш-бастер, чтобы всегда загружалась свежая версия Mini App
+        cache_buster = f"?v={datetime.datetime.now().timestamp()}"
+        # Формируем URL так, чтобы при перезагрузке он превращался в команду /start
+        start_param = current_step_data.get('event_next')
+        webapp_url = f"https://48392.github.io/lfulsne/{current_step_data['webapp']}{cache_buster}#event={start_param}"
+        
         button_text = current_step_data.get('webapp_button_text', "🎮 Открыть игру")
         ikb.button(text=button_text, web_app=types.WebAppInfo(url=webapp_url))
 
@@ -153,7 +152,22 @@ async def postback_chain_callback(callback: types.CallbackQuery, bot: Bot):
 
 
 @router.message(CommandStart())
-async def start_command(message: types.Message, user_id: int = 0):
+async def start_command(message: types.Message, bot: Bot, user_id: int = 0):
+    # Проверяем, есть ли в команде start параметр от webapp
+    args = message.text.split()
+    if len(args) > 1 and args[1].startswith('event='):
+        event_str = args[1].split('=')[1]
+        print(f"[DEBUG] Обнаружено событие из WebApp в команде start: {event_str}")
+        
+        # Создаем "фейковое" сообщение с web_app_data, чтобы передать его в наш существующий обработчик
+        fake_message = message.model_copy()
+        fake_message.web_app_data = types.WebAppGame(data=json.dumps({"event": event_str}))
+        
+        # Передаем управление в webapp_data_handler
+        await webapp_data_handler(fake_message, bot)
+        return
+
+    # Если обычный старт, продолжаем как раньше
     await message.delete()
     user = await DataBase.get_user_info(message.from_user.id if user_id == 0 else user_id)
     if user is None:
