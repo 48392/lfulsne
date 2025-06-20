@@ -184,9 +184,6 @@
           });
           const result = await response.json();
           if (result.success) {
-            // Вместо sendData, просто перезагружаем страницу с параметром
-            window.location.href = window.location.pathname + "?event=bonus_claimed";
-            // И закрываем приложение
             tg.close();
           } else {
             btn.disabled = false;
