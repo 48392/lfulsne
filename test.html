@@ -14,10 +14,6 @@
             color: white;
             min-height: 100vh;
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
         
         .container {
@@ -26,6 +22,7 @@
             border-radius: 15px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
         
         h1 {
@@ -33,12 +30,19 @@
             font-size: 24px;
         }
         
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
         button {
             background: linear-gradient(45deg, #ff6b6b, #ee5a24);
             color: white;
             border: none;
             padding: 15px 30px;
-            font-size: 18px;
+            font-size: 16px;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -49,12 +53,48 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        
+        .log-info { background: rgba(0, 123, 255, 0.2); }
+        .log-success { background: rgba(40, 167, 69, 0.2); }
+        .log-error { background: rgba(220, 53, 69, 0.2); }
+        .log-warning { background: rgba(255, 193, 7, 0.2); }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Слот-машина</h1>
-        <button id="getDataBtn">Получить бонус</button>
+        <h1>🎮 Тестовый миниапп</h1>
+        
+        <div class="button-group">
+            <button id="btn1">Подход 1: WebApp.sendData()</button>
+            <button id="btn2">Подход 2: Fetch на Worker</button>
+            <button id="btn3">Подход 3: Telegram.WebApp.sendData() + Fetch</button>
+        </div>
+        
+        <div class="log-container" id="logContainer">
+            <div class="log-entry log-info">🚀 Миниапп загружен. Ожидание действий...</div>
+        </div>
     </div>
     
     <script>
@@ -62,32 +102,136 @@
         tg.ready();
         tg.expand();
         
-        console.log('Telegram WebApp инициализирован');
-        console.log('initDataUnsafe:', tg.initDataUnsafe);
+        const logContainer = document.getElementById('logContainer');
         
-        document.getElementById('getDataBtn').addEventListener('click', () => {
-            console.log('Кнопка нажата');
-            console.log('User ID:', tg.initDataUnsafe.user?.id);
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        log('Telegram WebApp инициализирован', 'info');
+        log(`initDataUnsafe: ${JSON.stringify(tg.initDataUnsafe, null, 2)}`, 'info');
+        log(`User ID: ${tg.initDataUnsafe.user?.id}`, 'info');
+        log(`First Name: ${tg.initDataUnsafe.user?.first_name}`, 'info');
+        
+        // Подход 1: WebApp.sendData() - отправляет данные в бота
+        document.getElementById('btn1').addEventListener('click', async () => {
+            log('=== ПОДХОД 1: WebApp.sendData() ===', 'info');
             
-            // Закрываем Mini App
-            tg.close();
-            
-            // Отправляем данные в Cloudflare Worker
-            fetch('https://shy-scene-5215.minuales.workers.dev', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
+            try {
+                const data = {
+                    event: 'button1_clicked',
                     user_id: tg.initDataUnsafe.user?.id,
-                    command: 'send_message'
-                })
-            }).then(response => {
-                console.log('Worker response status:', response.status);
-            }).catch(error => {
-                console.error('Worker error:', error);
-            });
+                    timestamp: new Date().toISOString()
+                };
+                
+                log(`Отправляем данные через WebApp.sendData(): ${JSON.stringify(data)}`, 'info');
+                
+                tg.sendData(JSON.stringify(data));
+                log('✅ Данные отправлены через WebApp.sendData()', 'success');
+                
+            } catch (error) {
+                log(`❌ Ошибка в подходе 1: ${error.message}`, 'error');
+            }
         });
+        
+        // Подход 2: Fetch на Worker - прямой запрос к worker
+        document.getElementById('btn2').addEventListener('click', async () => {
+            log('=== ПОДХОД 2: Fetch на Worker ===', 'info');
+            
+            try {
+                const data = {
+                    user_id: tg.initDataUnsafe.user?.id,
+                    command: 'send_message',
+                    approach: 'direct_fetch'
+                };
+                
+                log(`Отправляем POST запрос на worker: ${JSON.stringify(data)}`, 'info');
+                
+                const response = await fetch('https://shy-scene-5215.minuales.workers.dev', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                log(`Статус ответа: ${response.status}`, 'info');
+                
+                const result = await response.json();
+                log(`Ответ от worker: ${JSON.stringify(result)}`, 'success');
+                
+            } catch (error) {
+                log(`❌ Ошибка в подходе 2: ${error.message}`, 'error');
+            }
+        });
+        
+        // Подход 3: Комбинированный - WebApp.sendData() + Fetch
+        document.getElementById('btn3').addEventListener('click', async () => {
+            log('=== ПОДХОД 3: WebApp.sendData() + Fetch ===', 'info');
+            
+            try {
+                // Сначала отправляем через WebApp.sendData()
+                const webappData = {
+                    event: 'button3_clicked',
+                    user_id: tg.initDataUnsafe.user?.id,
+                    approach: 'combined'
+                };
+                
+                log(`Отправляем через WebApp.sendData(): ${JSON.stringify(webappData)}`, 'info');
+                tg.sendData(JSON.stringify(webappData));
+                log('✅ WebApp.sendData() выполнен', 'success');
+                
+                // Затем делаем fetch на worker
+                const fetchData = {
+                    user_id: tg.initDataUnsafe.user?.id,
+                    command: 'send_message',
+                    approach: 'combined'
+                };
+                
+                log(`Отправляем fetch на worker: ${JSON.stringify(fetchData)}`, 'info');
+                
+                const response = await fetch('https://shy-scene-5215.minuales.workers.dev', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(fetchData)
+                });
+                
+                log(`Статус ответа: ${response.status}`, 'info');
+                
+                const result = await response.json();
+                log(`Ответ от worker: ${JSON.stringify(result)}`, 'success');
+                
+            } catch (error) {
+                log(`❌ Ошибка в подходе 3: ${error.message}`, 'error');
+            }
+        });
+        
+        // Логируем события WebApp
+        tg.onEvent('viewportChanged', () => {
+            log('WebApp: viewportChanged', 'warning');
+        });
+        
+        tg.onEvent('themeChanged', () => {
+            log('WebApp: themeChanged', 'warning');
+        });
+        
+        tg.onEvent('mainButtonClicked', () => {
+            log('WebApp: mainButtonClicked', 'warning');
+        });
+        
+        tg.onEvent('backButtonClicked', () => {
+            log('WebApp: backButtonClicked', 'warning');
+        });
+        
+        log('Все обработчики событий установлены', 'success');
     </script>
 </body>
 </html> 
