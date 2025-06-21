@@ -347,8 +347,30 @@
     });
 
     // Обработчик кнопки "Забрать" - НОВАЯ ЛОГИКА
-    claimBtn.addEventListener('click', () => {
-      Telegram.WebApp.close();
+    claimBtn.addEventListener('click', async () => {
+      const tg = window.Telegram.WebApp;
+      const userId = tg.initDataUnsafe?.user?.id;
+      if (!userId) {
+        alert('Ошибка: не удалось получить user_id');
+        return;
+      }
+      try {
+        claimBtn.disabled = true;
+        
+        // Отправляем данные через Telegram WebApp API
+        tg.sendData(JSON.stringify({
+          event: 'mini_closed',
+          step: 'fourth_mini',
+          user_id: userId
+        }));
+        
+        // Закрываем миниапп
+        tg.close();
+        
+      } catch (err) {
+        claimBtn.disabled = false;
+        console.error('Error:', err);
+      }
     });
 
     // Конфетти

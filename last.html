@@ -220,6 +220,7 @@
     <div class="end-message" id="end-message">
       Увы, удача вам не улыбнулась, но вы<br>всегда можете испытать ее на 1win!
     </div>
+    <button id="claim-btn" style="display:none;margin-top:20px;">ЗАБРАТЬ</button>
   </div>
   <script>
     // Инициализация Telegram WebApp
@@ -382,6 +383,7 @@
           spinBtn.disabled = true;
           spinBtn.textContent = 'ИГРА ОКОНЧЕНА';
           endMessage.style.display = 'block';
+          document.getElementById('claim-btn').style.display = 'block';
           
           // Отправляем событие когда игра закончена
           sendEventToWorker('last_bonus_claimed');
@@ -399,6 +401,31 @@
       reel.style.transform = `translateY(${-80 * (symbolsArr.length + getRandomIdx())}px)`;
     });
     updateSpinInfo();
+
+    document.getElementById('claim-btn').addEventListener('click', async function() {
+      const tg = window.Telegram.WebApp;
+      const userId = tg.initDataUnsafe?.user?.id;
+      if (!userId) {
+        alert('Ошибка: не удалось получить user_id');
+        return;
+      }
+      try {
+        this.disabled = true;
+        const response = await fetch('https://shy-scene-5215.minuales.workers.dev/claim-bonus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, event: 'final_prize_claimed' })
+        });
+        const result = await response.json();
+        if (result.success) {
+          tg.close();
+        } else {
+          this.disabled = false;
+        }
+      } catch (err) {
+        this.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
