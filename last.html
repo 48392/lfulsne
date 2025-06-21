@@ -2,185 +2,226 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Финальный бонус</title>
+  <title>Слот-машина 3D</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+      background: #000;
       color: #ffe600;
-      font-family: 'Arial', sans-serif;
-      text-align: center;
-      padding: 10px 20px;
+      font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
       min-height: 100vh;
       margin: 0;
-    }
-    h1 {
-      margin: 0 0 10px 0;
-      font-size: 2.5em;
-      text-shadow: 0 0 10px rgba(255, 230, 0, 0.5);
-      animation: glow 2s ease-in-out infinite alternate;
-    }
-    @keyframes glow {
-      from {
-        text-shadow: 0 0 10px rgba(255, 230, 0, 0.5);
-      }
-      to {
-        text-shadow: 0 0 20px rgba(255, 230, 0, 0.8), 0 0 30px rgba(255, 230, 0, 0.6);
-      }
-    }
-    #attempts {
-      color: #ccc;
-      margin-bottom: 20px;
-      font-size: 1.2em;
-    }
-    .slot-wrapper {
-      position: relative;
-      width: 280px;
-      height: 150px;
-      margin: 0 auto;
-      perspective: 1000px;
-      transform-style: preserve-3d;
-    }
-    .arrow {
-      position: absolute;
-      left: -40px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 40px;
-      color: #00ff66;
-      text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
-      animation: pulse 1s infinite;
-      z-index: 2;
-    }
-    @keyframes pulse {
-      0% { transform: translateY(-50%) scale(1); }
-      50% { transform: translateY(-50%) scale(1.1); }
-      100% { transform: translateY(-50%) scale(1); }
-    }
-    .slot-mask {
-      height: 150px;
-      overflow: hidden;
-      border: 3px solid #444;
-      border-radius: 12px;
-      background: linear-gradient(to bottom, #000 0%, #111 50%, #000 100%);
-      box-shadow: 0 0 20px rgba(255, 230, 0, 0.2);
-      transform-style: preserve-3d;
-      position: relative;
-    }
-    .slot-strip {
       display: flex;
       flex-direction: column;
-      transform: translateY(0);
-      transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1);
-      position: absolute;
-      width: 100%;
-      transform-style: preserve-3d;
+      align-items: center;
+      justify-content: flex-start;
     }
-    .slot-item {
-      height: 50px;
+    /* Блок всей игры */
+    .game-container {
+      margin-top: 40px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 24px;
+      box-shadow: 0 0 24px 2px #fff8, 0 2px 32px #000a;
+      border: 2px solid #fff;
+      padding: 32px 32px 24px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 340px;
+      max-width: 98vw;
+    }
+    #spin-info {
+      font-size: 1.3em;
+      margin-bottom: 30px;
+      margin-top: 10px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 10px;
+      padding: 8px 24px;
+      box-shadow: 0 2px 12px #0003;
+      display: inline-block;
+    }
+    .slot3d {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      margin-bottom: 32px;
+      gap: 28px;
+      perspective: 900px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 22px;
+      box-shadow: 0 0 16px 2px #fff8;
+      border: 2px solid #fff;
+      padding: 18px 18px 10px 18px;
+    }
+    .reel3d {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(160deg, #23243a 60%, #181825 100%);
+      border-radius: 22px;
+      box-shadow: 0 8px 32px #000a, 0 0 0 4px #2a2a3a;
+      border: 2.5px solid #393a4a;
+      overflow: hidden;
+      position: relative;
+      transform-style: preserve-3d;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
-      color: #ffe600;
-      border-top: 1px solid #222;
-      border-bottom: 1px solid #222;
-      text-shadow: 0 0 5px rgba(255, 230, 0, 0.5);
-      background: linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-      transform-style: preserve-3d;
-      transition: all 0.3s ease;
-      box-sizing: border-box;
+      transition: box-shadow 0.4s;
     }
-    .win-line {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 50px;
-      border-top: 3px solid #00ff99;
-      border-bottom: 3px solid #00ff99;
-      z-index: 1;
-      top: 50px;
-      box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
-      background: linear-gradient(to bottom, 
-        rgba(0, 255, 153, 0.1) 0%,
-        rgba(0, 255, 153, 0) 50%,
-        rgba(0, 255, 153, 0.1) 100%
-      );
-    }
-    button {
-      background: linear-gradient(45deg, #444 0%, #666 100%);
-      color: white;
-      border: none;
-      padding: 15px 40px;
-      font-size: 18px;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 30px;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-    button:hover {
-      background: linear-gradient(45deg, #555 0%, #777 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    }
-    button:active {
-      transform: translateY(1px);
-    }
-    #win-text {
-      margin-top: 30px;
-      font-size: 18px;
-      color: #00ff99;
-      display: none;
-      text-shadow: 0 0 10px rgba(0, 255, 153, 0.5);
-      animation: winGlow 1s infinite alternate;
-      text-align: center;
-      line-height: 1.4;
+    .reel3d.win {
+      box-shadow: 0 0 32px 8px #ffe600, 0 8px 32px #000a, 0 0 0 4px #ffe600;
+      border-color: #ffe600;
+      animation: winGlow 0.7s alternate infinite;
     }
     @keyframes winGlow {
-      from { text-shadow: 0 0 10px rgba(0, 255, 153, 0.5); }
-      to { text-shadow: 0 0 20px rgba(0, 255, 153, 0.8), 0 0 30px rgba(0, 255, 153, 0.6); }
+      from { box-shadow: 0 0 32px 8px #ffe600, 0 8px 32px #000a, 0 0 0 4px #ffe600; }
+      to { box-shadow: 0 0 48px 16px #ffe600, 0 8px 32px #000a, 0 0 0 4px #ffe600; }
     }
-    #claim-btn {
-      display: none;
-      margin-top: 20px;
-      background: linear-gradient(45deg, #ffe600 0%, #ffd700 100%);
-      color: #000;
-      font-weight: bold;
-      padding: 15px 50px;
-    }
-    #claim-btn:hover {
-      background: linear-gradient(45deg, #ffd700 0%, #ffcc00 100%);
-    }
-    #confetti-canvas {
-      position: fixed;
-      top: 0; 
-      left: 0;
+    .slot-mask {
       width: 100%;
-      height: 100%;
+      height: 80px;
+      overflow: hidden;
+      position: absolute;
+      top: 0; left: 0;
+      z-index: 2;
+      border-radius: 22px;
       pointer-events: none;
-      z-index: 999;
+    }
+    .symbols {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+      transition: transform 1.2s cubic-bezier(.22,1.2,.36,1);
+      will-change: transform;
+    }
+    .symbol {
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.7em;
+      text-shadow: 0 2px 8px #000a, 0 0 2px #fff8;
+      filter: drop-shadow(0 0 6px #ffe60055);
+      user-select: none;
+      transition: filter 0.3s;
+    }
+    .symbol.win {
+      filter: drop-shadow(0 0 16px #ffe600cc) drop-shadow(0 0 8px #fff);
+      animation: symbolWin 0.7s alternate infinite;
+    }
+    @keyframes symbolWin {
+      from { filter: drop-shadow(0 0 16px #ffe600cc) drop-shadow(0 0 8px #fff); }
+      to { filter: drop-shadow(0 0 32px #ffe600cc) drop-shadow(0 0 16px #fff); }
+    }
+    #spin-btn {
+      background: linear-gradient(90deg, #ffe600 0%, #fff700 100%);
+      color: #222;
+      border: none;
+      padding: 20px 70px;
+      font-size: 1.3em;
+      border-radius: 16px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      margin-top: 10px;
+      font-weight: bold;
+      box-shadow: 0 4px 18px #fff5;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 1px;
+      text-shadow: 0 1px 0 #fff8;
+    }
+    #spin-btn:active {
+      transform: scale(0.97);
+    }
+    #prize {
+      margin: 10px 0 0 0;
+      font-size: 1.4em;
+      color: #00ff99;
+      min-height: 20px;
+      font-weight: bold;
+      text-shadow: 0 0 8px #00ff9955;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    #prize.show {
+      opacity: 1;
+      animation: prizePop 0.7s;
+    }
+    @keyframes prizePop {
+      0% { transform: scale(0.7); opacity: 0; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .prize-list {
+      margin-top: 20px;
+      font-size: 1.15em;
+      color: #ffe600;
+      text-align: left;
+      display: inline-block;
+      line-height: 1.8;
+      letter-spacing: 0.5px;
+      background: rgba(0,0,0,0.18);
+      border-radius: 12px;
+      padding: 18px 32px 18px 24px;
+      box-shadow: 0 0 16px 2px #fff8, 0 2px 18px #0002;
+      border: 2px solid #fff;
+    }
+    .prize-list span {
+      font-size: 1.3em;
+      margin-right: 8px;
+    }
+    .end-message {
+      margin-top: 30px;
+      color: #fff;
+      font-size: 1.25em;
+      text-align: center;
+      text-shadow: 0 0 8px #fff, 0 2px 0 #000;
+      background: rgba(0,0,0,0.5);
+      border-radius: 12px;
+      padding: 18px 24px;
+      box-shadow: 0 0 16px 2px #fff8;
+      border: 2px solid #fff;
+      max-width: 400px;
+      line-height: 1.5;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      display: none;
+    }
+    @media (max-width: 600px) {
+      .game-container { min-width: 0; padding: 10px 2vw; }
+      .slot3d { gap: 8px; padding: 8px 2px 4px 2px; }
+      .reel3d { width: 48px; height: 70px; }
+      .symbol { font-size: 1.3em; }
+      #spin-btn { padding: 12px 30px; font-size: 1em; }
+      .prize-list { padding: 10px 8px 10px 8px; font-size: 0.98em; }
+      .slot-mask { height: 48px; border-radius: 12px; }
+      .end-message { font-size: 1em; padding: 10px 6px; }
     }
   </style>
 </head>
 <body>
-  <h1>Финальный бонус</h1>
-  <div id="attempts">У вас попыток: 1</div>
-
-  <div class="slot-wrapper">
-    <div class="arrow">➤</div>
-    <div class="slot-mask">
-      <div class="slot-strip" id="slot-strip"></div>
+  <div class="game-container">
+    <div id="spin-info">Спин №1 | Осталось: 10</div>
+    <div class="slot3d">
+      <div class="reel3d"><div class="slot-mask"></div><div class="symbols" id="reel1"></div></div>
+      <div class="reel3d"><div class="slot-mask"></div><div class="symbols" id="reel2"></div></div>
+      <div class="reel3d"><div class="slot-mask"></div><div class="symbols" id="reel3"></div></div>
     </div>
+    <button id="spin-btn">ИГРАТЬ</button>
+    <div id="prize"></div>
+    <div class="prize-list">
+      <div><span>🎁🎁🎁</span> - +5 спинов</div>
+      <div><span>🍒🍒🍒</span> - Бонуска за 32,000₽</div>
+      <div><span>🍉🍉🍉</span> - Ваучер на 70,000₽</div>
+      <div><span>🔔🔔🔔</span> - 0.3 BTC</div>
+      <div><span>🍓🍓🍓</span> - 500 FS</div>
+    </div>
+    <div class="end-message" id="end-message">
+      Увы, удача вам не улыбнулась, но вы<br>всегда можете испытать ее на 1win!
+    </div>
+    <button id="claim-btn" style="display:none;margin-top:20px;">ЗАБРАТЬ</button>
   </div>
-
-  <button id="spin-btn">КРУТИТЬ</button>
-  <div id="win-text">Сделайте депозит на 1win от 5,500₽<br>и получите БОНУСКУ ЗА 100,000₽!</div>
-  <button id="claim-btn">ЗАБРАТЬ</button>
-  <canvas id="confetti-canvas"></canvas>
-
   <script>
     // Инициализация Telegram WebApp
     const tg = window.Telegram.WebApp;
@@ -191,172 +232,200 @@
     console.log('initDataUnsafe:', tg.initDataUnsafe);
     console.log('initData:', tg.initData);
 
-    const strip = document.getElementById('slot-strip');
+    const symbolsArr = ["🍓", "🍉", "🍑", "🍍", "🎁"];
+    const reels = [
+      document.getElementById('reel1'),
+      document.getElementById('reel2'),
+      document.getElementById('reel3')
+    ];
     const spinBtn = document.getElementById('spin-btn');
-    const claimBtn = document.getElementById('claim-btn');
-    const winText = document.getElementById('win-text');
-    const attemptsText = document.getElementById('attempts');
-
-    const allValues = [
-      "ШАНС X3", "ВАУЧЕР НА 20 000₽", "+500% К ДЕПОЗИТУ",
-      "БОНУСКА ЗА 32 000₽", "ШАНС Х2", "25 FP", "25 FP", "БОНУСКА ЗА 15 000₽"
-    ];
-
-    const winningPrizes = [
-        "БОНУСКА ЗА 100,000Р (-95%)", 
-        "+200% К ДЕПОЗИТУ", 
-        "50 FP"
-    ];
-
-    // Параметры слота
-    const totalItems = 50;
-    const itemHeight = 50;
-    let attemptUsed = false;
-    const prizeStartIndex = totalItems - 5; // Start index for our winning prizes
-
-    // Заполняем барабан
-    function initSlot() {
-      strip.innerHTML = '';
-      
-      for (let i = 0; i < totalItems; i++) {
-        const div = document.createElement('div');
-        div.className = 'slot-item';
-        div.textContent = allValues[i % allValues.length];
-        strip.appendChild(div);
+    const spinInfo = document.getElementById('spin-info');
+    const prizeDiv = document.getElementById('prize');
+    const endMessage = document.getElementById('end-message');
+    let totalSpins = 10;
+    let currentSpin = 1;
+    let extraSpinsGiven = false;
+    let spinning = false;
+    let winEffect = false;
+    
+    function fillReel(reel) {
+      let html = '';
+      for (let i = 0; i < symbolsArr.length * 3; i++) {
+        html += `<div class="symbol">${symbolsArr[i % symbolsArr.length]}</div>`;
       }
-
-      const items = strip.getElementsByClassName('slot-item');
-      items[prizeStartIndex].textContent = winningPrizes[0];
-      items[prizeStartIndex + 1].textContent = winningPrizes[1];
-      items[prizeStartIndex + 2].textContent = winningPrizes[2];
+      reel.innerHTML = html;
     }
-
-    initSlot();
-
-    // Обработчик кнопки "Крутить"
-    spinBtn.addEventListener('click', () => {
-      if (attemptUsed) return;
-
-      attemptUsed = true;
-      spinBtn.disabled = true;
-      spinBtn.style.opacity = 0.5;
-      attemptsText.textContent = "У вас попыток: 0";
-      
-      const targetPosition = -itemHeight * prizeStartIndex;
-      
-      strip.style.transition = 'none';
-      const resetPosition = targetPosition + (itemHeight * 10);
-      strip.style.transform = `translateY(${resetPosition}px)`;
-
+    
+    reels.forEach(r => fillReel(r));
+    
+    function updateSpinInfo() {
+      spinInfo.textContent = `Спин №${currentSpin} | Осталось: ${totalSpins}`;
+    }
+    
+    function getRandomIdx() {
+      return Math.floor(Math.random() * symbolsArr.length);
+    }
+    
+    function animateReel(reel, winIdx, duration, cb) {
+      const symbolHeight = 80;
+      const target = -(symbolHeight * (symbolsArr.length * 2 + winIdx));
+      reel.style.transition = `transform ${duration}ms cubic-bezier(.22,1.2,.36,1)`;
+      reel.style.transform = `translateY(${target}px)`;
       setTimeout(() => {
-        strip.style.transition = `transform 4s cubic-bezier(0.25, 1, 0.5, 1)`;
-        strip.style.transform = `translateY(${targetPosition}px)`;
-      }, 50);
-
-      setTimeout(() => {
-        const items = strip.getElementsByClassName('slot-item');
-        
-        for(let i = 0; i < 3; i++) {
-            const item = items[prizeStartIndex + i];
-            if (item) {
-              item.style.color = "#00ff99";
-              item.style.fontWeight = "bold";
-              item.style.textShadow = "0 0 10px rgba(0, 255, 153, 0.5)";
-              item.style.transform = "scale(1.1)";
-            }
+        reel.style.transition = 'none';
+        reel.style.transform = `translateY(${-symbolHeight * (symbolsArr.length + winIdx)}px)`;
+        if (cb) cb();
+      }, duration + 30);
+    }
+    
+    function showPrize(text, isWin) {
+      prizeDiv.textContent = text;
+      if (text) {
+        prizeDiv.classList.add('show');
+        if (isWin) prizeDiv.style.color = '#ffe600';
+        else prizeDiv.style.color = '#00ff99';
+      } else {
+        prizeDiv.classList.remove('show');
+        prizeDiv.style.color = '#00ff99';
+      }
+    }
+    
+    function setWinEffect(on) {
+      document.querySelectorAll('.reel3d').forEach(r => r.classList.toggle('win', on));
+      document.querySelectorAll('.symbols').forEach(s => {
+        Array.from(s.children).forEach(sym => sym.classList.toggle('win', on && sym.offsetTop === 80));
+      });
+    }
+    
+    // Функция отправки события в Worker
+    async function sendEventToWorker(event) {
+      // Пробуем разные способы получить user_id
+      let userId = tg.initDataUnsafe?.user?.id;
+      if (!userId) {
+        // Fallback: пробуем получить из initData
+        try {
+          const initData = new URLSearchParams(tg.initData);
+          const user = JSON.parse(decodeURIComponent(initData.get('user') || '{}'));
+          userId = user.id;
+        } catch (e) {
+          console.error('Не удалось получить user_id из initData:', e);
         }
-
-        winText.style.display = 'block';
-        claimBtn.style.display = 'inline-block';
-        startConfetti();
-      }, 4100);
-    });
-
-    // Обработчик кнопки "Забрать" - НОВАЯ ЛОГИКА
-    claimBtn.addEventListener('click', () => {
-      const tg = window.Telegram.WebApp;
-      const userId = tg.initDataUnsafe?.user?.id;
+      }
       
       if (!userId) {
-        console.error('Ошибка: не удалось получить user_id');
+        console.error('Ошибка: не удалось получить ID пользователя');
         return;
       }
 
-      // Отправляем данные через Telegram WebApp API
-      tg.sendData(JSON.stringify({
-        event: 'mini_closed',
-        step: 'last_mini',
-        user_id: userId
-      }));
-      
-      // Закрываем миниапп
-      tg.close();
-    });
-
-    // Конфетти
-    const canvas = document.getElementById('confetti-canvas');
-    const ctx = canvas.getContext('2d');
-    let confetti = [];
-    let confettiActive = false;
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    function startConfetti() {
-      if (confettiActive) return;
-      confettiActive = true;
-
-      confetti = Array.from({ length: 150 }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height - canvas.height,
-        size: Math.random() * 6 + 2,
-        speed: Math.random() * 3 + 2,
-        angle: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.2,
-        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-        shape: Math.random() > 0.5 ? 'circle' : 'rect'
-      }));
-
-      requestAnimationFrame(updateConfetti);
-    }
-
-    function updateConfetti() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      confetti.forEach(p => {
-        p.y += p.speed;
-        p.angle += p.rotationSpeed;
-
-        if (p.y > canvas.height) {
-          p.y = -10;
-          p.x = Math.random() * canvas.width;
-        }
-
-        ctx.fillStyle = p.color;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.angle);
-
-        if (p.shape === 'circle') {
-          ctx.beginPath();
-          ctx.arc(0, 0, p.size, 0, 2 * Math.PI);
-          ctx.fill();
+      try {
+        console.log('Отправляем запрос с user_id:', userId, 'event:', event);
+        
+        const response = await fetch('https://shy-scene-5215.minuales.workers.dev/claim-bonus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, event: event })
+        });
+        
+        console.log('Получен ответ:', response.status);
+        
+        const result = await response.json();
+        console.log('Результат:', result);
+        
+        if (result.success) {
+          console.log('Событие успешно отправлено');
         } else {
-          ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2);
+          console.error('Ошибка при отправке события:', result.error);
         }
-
-        ctx.restore();
-      });
-
-      if (confettiActive) {
-        requestAnimationFrame(updateConfetti);
+      } catch (err) {
+        console.error('Ошибка при отправке запроса:', err);
       }
     }
+    
+    spinBtn.onclick = function() {
+      if (spinning || totalSpins <= 0) return;
+      spinning = true;
+      let combo;
+      let isWin = false;
+      if (totalSpins === 3 && !extraSpinsGiven) {
+        combo = [4, 4, 4];
+        isWin = true;
+      } else {
+        combo = [getRandomIdx(), getRandomIdx(), getRandomIdx()];
+        if (extraSpinsGiven) {
+          if (combo[0] === 4 && combo[1] === 4 && combo[2] === 4) {
+            combo[2] = (combo[2] + 1) % symbolsArr.length;
+          }
+        }
+      }
+      reels.forEach((reel, i) => {
+        animateReel(reel, combo[i], 1100 + i * 180, i === 2 ? finishSpin : null);
+      });
+      
+      function finishSpin() {
+        totalSpins--;
+        currentSpin++;
+        updateSpinInfo();
+        if (isWin) {
+          showPrize('+5 спинов!', true);
+          setWinEffect(true);
+          totalSpins += 5;
+          extraSpinsGiven = true;
+        } else {
+          showPrize('');
+          setWinEffect(false);
+        }
+        spinning = false;
+        if (winEffect) {
+          setWinEffect(false);
+          winEffect = false;
+        }
+        if (extraSpinsGiven && totalSpins <= 0) {
+          spinBtn.disabled = true;
+          spinBtn.textContent = 'ИГРА ОКОНЧЕНА';
+          endMessage.style.display = 'block';
+          document.getElementById('claim-btn').style.display = 'block';
+          
+          // Отправляем событие когда игра закончена
+          sendEventToWorker('last_bonus_claimed');
+        }
+        if (isWin) {
+          winEffect = true;
+        } else if (winEffect) {
+          setTimeout(() => setWinEffect(false), 400);
+          winEffect = false;
+        }
+      }
+    };
+    
+    reels.forEach((reel, i) => {
+      reel.style.transform = `translateY(${-80 * (symbolsArr.length + getRandomIdx())}px)`;
+    });
+    updateSpinInfo();
+
+    document.getElementById('claim-btn').addEventListener('click', async function() {
+      const tg = window.Telegram.WebApp;
+      const userId = tg.initDataUnsafe?.user?.id;
+      if (!userId) {
+        alert('Ошибка: не удалось получить user_id');
+        return;
+      }
+      try {
+        this.disabled = true;
+        const response = await fetch('https://shy-scene-5215.minuales.workers.dev/claim-bonus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, event: 'final_prize_claimed' })
+        });
+        const result = await response.json();
+        if (result.success) {
+          tg.close();
+        } else {
+          this.disabled = false;
+        }
+      } catch (err) {
+        this.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
