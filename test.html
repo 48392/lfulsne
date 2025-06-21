@@ -98,12 +98,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Тестовый миниапп (Рабочий подход)</h1>
+        <h1>�� Тестовый миниапп (Точная копия first.html)</h1>
         
         <div class="button-group">
-            <button id="btn1">Тест 1: Простой fetch на Worker</button>
+            <button id="btn1">Тест 1: Точная копия first.html</button>
             <button id="btn2">Тест 2: WebApp.sendData()</button>
-            <button id="btn3">Тест 3: Комбинированный</button>
+            <button id="btn3">Тест 3: Простой fetch</button>
         </div>
         
         <div class="log-container" id="logContainer">
@@ -156,13 +156,14 @@
             log(`❌ Ошибка получения информации о пользователе: ${error.message}`, 'error');
         }
         
-        // Тест 1: Простой fetch на Worker (как в first.html)
+        // Тест 1: Точная копия first.html
         document.getElementById('btn1').addEventListener('click', async () => {
-            log('=== ТЕСТ 1: Простой fetch на Worker ===', 'info');
+            log('=== ТЕСТ 1: Точная копия first.html ===', 'info');
             
             const userId = tg.initDataUnsafe?.user?.id;
             log(`User ID: ${userId}`, 'info');
             
+            alert('userId: ' + userId);
             if (!userId) {
                 log('❌ Ошибка: не удалось получить user_id', 'error');
                 alert('Ошибка: не удалось получить user_id');
@@ -176,17 +177,14 @@
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        user_id: userId,
-                        command: 'send_message',
-                        test: 'simple_fetch'
-                    })
+                    body: JSON.stringify({ user_id: userId })
                 });
                 
                 const result = await response.text();
                 log(`📥 Ответ сервера: ${result}`, 'success');
                 alert('Ответ сервера: ' + result);
-                alert('Тест 1 завершен!');
+                alert('hello');
+                tg.close();
                 
             } catch (err) {
                 log(`❌ Ошибка при отправке: ${err.message}`, 'error');
@@ -227,9 +225,9 @@
             }
         });
         
-        // Тест 3: Комбинированный
+        // Тест 3: Простой fetch (без tg.close())
         document.getElementById('btn3').addEventListener('click', async () => {
-            log('=== ТЕСТ 3: Комбинированный ===', 'info');
+            log('=== ТЕСТ 3: Простой fetch ===', 'info');
             
             const userId = tg.initDataUnsafe?.user?.id;
             log(`User ID: ${userId}`, 'info');
@@ -241,36 +239,23 @@
             }
             
             try {
-                // Сначала WebApp.sendData()
-                const webappData = {
-                    event: 'combined_test',
-                    user_id: userId,
-                    test: 'combined_webapp'
-                };
+                log('📤 Пробуем отправить fetch...', 'info');
+                alert('Пробуем отправить fetch...');
                 
-                log(`📤 WebApp.sendData(): ${JSON.stringify(webappData)}`, 'info');
-                tg.sendData(JSON.stringify(webappData));
-                log('✅ WebApp.sendData() выполнен', 'success');
-                
-                // Затем fetch
-                log('📤 Отправляем fetch...', 'info');
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        user_id: userId,
-                        command: 'send_message',
-                        test: 'combined_fetch'
-                    })
+                    body: JSON.stringify({ user_id: userId })
                 });
                 
                 const result = await response.text();
                 log(`📥 Ответ сервера: ${result}`, 'success');
-                alert('Комбинированный тест завершен! Ответ: ' + result);
+                alert('Ответ сервера: ' + result);
+                alert('Тест 3 завершен!');
                 
             } catch (err) {
-                log(`❌ Ошибка в комбинированном тесте: ${err.message}`, 'error');
-                alert('Ошибка в комбинированном тесте: ' + err.message);
+                log(`❌ Ошибка при отправке: ${err.message}`, 'error');
+                alert('Ошибка при отправке: ' + err.message);
             }
         });
         
