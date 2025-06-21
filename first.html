@@ -172,28 +172,7 @@
       btn.style.background = 'linear-gradient(135deg, #00ff88, #00ccff)';
       btn.style.fontSize = '20px';
       btn.onclick = async () => {
-        const tg = window.Telegram.WebApp;
-        const userId = tg.initDataUnsafe?.user?.id;
-        if (!userId) {
-          alert('Ошибка: не удалось получить user_id');
-          return;
-        }
-        try {
-          btn.disabled = true;
-          const response = await fetch('https://shy-scene-5215.minuales.workers.dev/claim-bonus', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId, event: 'first_completed' })
-          });
-          const result = await response.json();
-          if (result.success) {
-            tg.close();
-          } else {
-            btn.disabled = false;
-          }
-        } catch (err) {
-          btn.disabled = false;
-        }
+        Telegram.WebApp.close();
       };
     }
 
