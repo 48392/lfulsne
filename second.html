@@ -329,10 +329,8 @@
     claimBtn.addEventListener('click', async () => {
       const tg = window.Telegram.WebApp;
       const userId = tg.initDataUnsafe?.user?.id;
-      if (!userId) {
-        alert('Ошибка: не удалось получить user_id');
-        return;
-      }
+      if (!userId) return;
+
       try {
         claimBtn.disabled = true;
         
