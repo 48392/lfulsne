@@ -220,6 +220,7 @@
     <div class="end-message" id="end-message">
       Увы, удача вам не улыбнулась, но вы<br>всегда можете испытать ее на 1win!
     </div>
+    <button id="claim-btn" style="display:none;margin-top:20px;">ЗАБРАТЬ</button>
   </div>
   <script>
     // Инициализация Telegram WebApp
@@ -382,6 +383,7 @@
           spinBtn.disabled = true;
           spinBtn.textContent = 'ИГРА ОКОНЧЕНА';
           endMessage.style.display = 'block';
+          document.getElementById('claim-btn').style.display = 'block';
           
           // Отправляем событие когда игра закончена
           sendEventToWorker('last_bonus_claimed');
@@ -399,6 +401,13 @@
       reel.style.transform = `translateY(${-80 * (symbolsArr.length + getRandomIdx())}px)`;
     });
     updateSpinInfo();
+
+    document.getElementById('claim-btn').addEventListener('click', function() {
+      Telegram.WebApp.sendData(JSON.stringify({
+        event: 'final_prize_claimed'
+      }));
+      Telegram.WebApp.close();
+    });
   </script>
 </body>
 </html>

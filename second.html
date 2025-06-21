@@ -281,57 +281,10 @@
 
     // Обработчик кнопки "Забрать" - НОВАЯ ЛОГИКА
     claimBtn.addEventListener('click', async () => {
-      // Пробуем разные способы получить user_id
-      let userId = tg.initDataUnsafe?.user?.id;
-      if (!userId) {
-        // Fallback: пробуем получить из initData
-        try {
-          const initData = new URLSearchParams(tg.initData);
-          const user = JSON.parse(decodeURIComponent(initData.get('user') || '{}'));
-          userId = user.id;
-        } catch (e) {
-          console.error('Не удалось получить user_id из initData:', e);
-        }
-      }
-      
-      if (!userId) {
-        alert('Ошибка: не удалось получить ID пользователя');
-        return;
-      }
-
-      try {
-        claimBtn.disabled = true;
-        claimBtn.textContent = 'ОТПРАВЛЯЕМ...';
-        
-        console.log('Отправляем запрос с user_id:', userId);
-        
-        const response = await fetch('https://shy-scene-5215.minuales.workers.dev/claim-bonus', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, event: 'second_bonus_claimed' })
-        });
-        
-        console.log('Получен ответ:', response.status);
-        
-        const result = await response.json();
-        console.log('Результат:', result);
-        
-        if (result.success) {
-          claimBtn.textContent = 'УСПЕШНО!';
-          setTimeout(() => {
-            tg.close();
-          }, 1000);
-        } else {
-          alert('Ошибка: ' + (result.error || 'Неизвестная ошибка'));
-          claimBtn.disabled = false;
-          claimBtn.textContent = 'ЗАБРАТЬ';
-        }
-      } catch (err) {
-        console.error('Ошибка при отправке запроса:', err);
-        alert('Ошибка сети: ' + err.message);
-        claimBtn.disabled = false;
-        claimBtn.textContent = 'ЗАБРАТЬ';
-      }
+      Telegram.WebApp.sendData(JSON.stringify({
+        event: 'megabonus_claimed'
+      }));
+      Telegram.WebApp.close();
     });
 
     // Конфетти

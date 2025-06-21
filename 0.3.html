@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Колесо Удачи</title>
+  <title>Крипто Слот</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -10,12 +10,12 @@
       color: #ffe600;
       font-family: 'Arial', sans-serif;
       text-align: center;
-      padding: 10px 20px;
+      padding: 60px 20px;
       min-height: 100vh;
       margin: 0;
     }
     h1 {
-      margin: 0 0 10px 0;
+      margin-bottom: 10px;
       font-size: 2.5em;
       text-shadow: 0 0 10px rgba(255, 230, 0, 0.5);
       animation: glow 2s ease-in-out infinite alternate;
@@ -66,6 +66,7 @@
       box-shadow: 0 0 20px rgba(255, 230, 0, 0.2);
       transform-style: preserve-3d;
       position: relative;
+      transform: rotateX(10deg);
     }
     .slot-strip {
       display: flex;
@@ -95,46 +96,16 @@
       left: 0;
       right: 0;
       height: 50px;
+      border-top: 3px solid #00ff99;
+      border-bottom: 3px solid #00ff99;
       z-index: 1;
       top: 50px;
-      border: 3px solid #00ff99;
-      border-radius: 8px;
       box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
-      background: transparent;
-    }
-    .win-line-top {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 50px;
-      z-index: 1;
-      top: 0px;
-      border: 3px solid #00ff99;
-      border-radius: 8px;
-      box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
-      background: transparent;
-    }
-    .win-line-bottom {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 50px;
-      z-index: 1;
-      top: 99px;
-      border: 3px solid #00ff99;
-      border-radius: 8px;
-      box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
-      background: transparent;
-    }
-    .arrow-top {
-      position: absolute;
-      left: -40px;
-      top: 25px;
-      font-size: 40px;
-      color: #00ff66;
-      text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
-      animation: pulse 1s infinite;
-      z-index: 2;
+      background: linear-gradient(to bottom, 
+        rgba(0, 255, 153, 0.1) 0%,
+        rgba(0, 255, 153, 0) 50%,
+        rgba(0, 255, 153, 0.1) 100%
+      );
     }
     button {
       background: linear-gradient(45deg, #444 0%, #666 100%);
@@ -159,14 +130,12 @@
       transform: translateY(1px);
     }
     #win-text {
-      margin-top: 20px;
-      font-size: 18px;
+      margin-top: 30px;
+      font-size: 28px;
       color: #00ff99;
       display: none;
       text-shadow: 0 0 10px rgba(0, 255, 153, 0.5);
       animation: winGlow 1s infinite alternate;
-      text-align: center;
-      line-height: 1.3;
     }
     @keyframes winGlow {
       from { text-shadow: 0 0 10px rgba(0, 255, 153, 0.5); }
@@ -174,7 +143,7 @@
     }
     #claim-btn {
       display: none;
-      margin-top: 15px;
+      margin-top: 20px;
       background: linear-gradient(45deg, #ffe600 0%, #ffd700 100%);
       color: #000;
       font-weight: bold;
@@ -192,57 +161,26 @@
       pointer-events: none;
       z-index: 999;
     }
-    .win-cell-border {
-      position: absolute;
-      left: -4px;
-      right: -4px;
-      height: 58px;
-      border: 2.5px solid #00ff99;
-      border-radius: 12px;
-      box-shadow: 0 0 16px 2px #00ff99;
-      pointer-events: none;
-      z-index: 10;
-    }
-    .win-line-middle {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 0;
-      top: 50px;
-      border-top: 2px solid #00ff99;
-      box-shadow: 0 0 8px 1px #00ff99;
-      pointer-events: none;
-      z-index: 2;
-    }
   </style>
 </head>
 <body>
-  <h1>Мега Бонуска</h1>
-  <div id="attempts">У вас попыток: 1</div>
+  <h1>Крипто Бонуска</h1>
+  <div id="attempts">У вас попыток 1</div>
 
   <div class="slot-wrapper">
     <div class="arrow">➤</div>
-    <div class="arrow-top">➤</div>
+    <div class="win-line"></div>
     <div class="slot-mask">
       <div class="slot-strip" id="slot-strip"></div>
     </div>
   </div>
 
   <button id="spin-btn">КРУТИТЬ</button>
-  <div id="win-text">Сделайте депозит на 1win от 3,500₽ и получите Шанс X3 и + 220% к любому депозиту!</div>
+  <div id="win-text">Ура! Вы выиграли 0.3 USDT!</div>
   <button id="claim-btn">ЗАБРАТЬ</button>
   <canvas id="confetti-canvas"></canvas>
 
   <script>
-    // Инициализация Telegram WebApp
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-    
-    console.log('Telegram WebApp инициализирован');
-    console.log('initDataUnsafe:', tg.initDataUnsafe);
-    console.log('initData:', tg.initData);
-
     const strip = document.getElementById('slot-strip');
     const spinBtn = document.getElementById('spin-btn');
     const claimBtn = document.getElementById('claim-btn');
@@ -250,111 +188,67 @@
     const attemptsText = document.getElementById('attempts');
 
     const allValues = [
-      "+220% К ДЕПОЗИТУ", "25 FP", "БОНУСКА ЗА 32 000₽", 
-      "БОНУСКА ЗА 15 000₽", "ВАУЧЕР НА 20 000₽", "50 FP", "ШАНС Х2", "ШАНС X3"
+      '0.3 USDT', '1 LTC', '50 DOGE', 
+      '0.01 ETH', '5 XRP', '2 TON', '0.0001 BTC', '0.0005 BTC'
     ];
 
-    // Параметры слота
     const totalItems = 50;
     const itemHeight = 50;
-    const winPosition = 25; // Позиция для выигрыша
+    const winPosition = 25;
     let attemptUsed = false;
 
-    // Заполняем барабан
     function initSlot() {
       strip.innerHTML = '';
-      
-      // Добавляем элементы
       for (let i = 0; i < totalItems; i++) {
         const div = document.createElement('div');
         div.className = 'slot-item';
-        // Используем фиксированный порядок значений
         div.textContent = allValues[i % allValues.length];
         strip.appendChild(div);
       }
-      
-      // Устанавливаем начальное положение
       strip.style.transform = `translateY(0)`;
     }
 
     initSlot();
 
-    // Обработчик кнопки "Крутить"
     spinBtn.addEventListener('click', () => {
       if (attemptUsed) return;
 
       attemptUsed = true;
       spinBtn.disabled = true;
       spinBtn.style.opacity = 0.5;
-      attemptsText.textContent = "У вас попыток: 0";
+      attemptsText.textContent = 'У вас попыток 0';
 
-      // Сброс перед анимацией
       strip.style.transition = 'none';
       strip.style.transform = `translateY(${-itemHeight * 5}px)`;
 
-      // Запуск анимации
       setTimeout(() => {
-        // Запускаем анимацию с фиксированным смещением
         strip.style.transition = `transform 3.5s cubic-bezier(0.1, 0.7, 0.1, 1)`;
         strip.style.transform = `translateY(${-winPosition * itemHeight + 50}px)`;
-        
-        // Добавляем эффект замедления
-        const items = strip.getElementsByClassName('slot-item');
-        for (let item of items) {
-          item.style.transition = 'all 0.3s ease';
-          item.style.transform = 'scale(1.1)';
-          setTimeout(() => {
-            item.style.transform = 'scale(1)';
-          }, 100);
-        }
-        
-        console.log('Анимация запущена, конечная позиция:', -winPosition * itemHeight + 50);
       }, 50);
 
-      // Показ выигрыша и добавление эффекта свечения
       setTimeout(() => {
-        // Находим все элементы с выигрышным значением и добавляем эффект свечения
         const items = strip.getElementsByClassName('slot-item');
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-          if (item.textContent === "ШАНС X3") {
-            item.style.color = "#00ff99";
-            item.style.fontWeight = "bold";
-            item.style.textShadow = "0 0 10px rgba(0, 255, 153, 0.5)";
-            item.style.transform = "scale(1.2)";
-          }
-          // Добавляем свечение для верхней клетки (ШАНС X3)
-          if (item.textContent === "ШАНС X3") {
-            item.style.color = "#00ff99";
-            item.style.fontWeight = "bold";
-            item.style.textShadow = "0 0 10px rgba(0, 255, 153, 0.5)";
-            item.style.transform = "scale(1.2)";
-          }
-          // Добавляем свечение для средней клетки (+220% К ДЕПОЗИТУ)
-          if (item.textContent === "+220% К ДЕПОЗИТУ") {
-            item.style.color = "#00ff99";
-            item.style.fontWeight = "bold";
-            item.style.textShadow = "0 0 10px rgba(0, 255, 153, 0.5)";
-            item.style.transform = "scale(1.2)";
+        for (let item of items) {
+          if (item.textContent === '0.3 USDT') {
+            item.style.color = '#00ff99';
+            item.style.fontWeight = 'bold';
+            item.style.textShadow = '0 0 10px rgba(0, 255, 153, 0.5)';
           }
         }
 
         winText.style.display = 'block';
         claimBtn.style.display = 'inline-block';
         startConfetti();
-        console.log('Выигрыш показан, позиция:', winPosition);
       }, 4000);
     });
 
-    // Обработчик кнопки "Забрать" - НОВАЯ ЛОГИКА
-    claimBtn.addEventListener('click', () => {
+    claimBtn.addEventListener('click', async () => {
       Telegram.WebApp.sendData(JSON.stringify({
-        event: 'x2_claimed'
+        event: 'crypto_bonus_claimed'
       }));
       Telegram.WebApp.close();
     });
 
-    // Конфетти
     const canvas = document.getElementById('confetti-canvas');
     const ctx = canvas.getContext('2d');
     let confetti = [];
@@ -420,4 +314,4 @@
     }
   </script>
 </body>
-</html>
+</html> 
