@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Mini App</title>
+    <title>Простой тест</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -25,18 +25,6 @@
             margin-bottom: 20px;
         }
         
-        h1 {
-            margin-bottom: 30px;
-            font-size: 24px;
-        }
-        
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
         button {
             background: linear-gradient(45deg, #ff6b6b, #ee5a24);
             color: white;
@@ -47,6 +35,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 10px;
         }
         
         button:hover {
@@ -54,124 +43,71 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
         
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .log-container {
+        .log {
             background: rgba(0, 0, 0, 0.3);
             padding: 15px;
             border-radius: 10px;
             text-align: left;
-            max-height: 400px;
+            max-height: 300px;
             overflow-y: auto;
             font-family: monospace;
             font-size: 12px;
+            margin-top: 20px;
         }
-        
-        .log-entry {
-            margin-bottom: 5px;
-            padding: 5px;
-            border-radius: 3px;
-            word-wrap: break-word;
-        }
-        
-        .log-info { background: rgba(0, 123, 255, 0.2); }
-        .log-success { background: rgba(40, 167, 69, 0.2); }
-        .log-error { background: rgba(220, 53, 69, 0.2); }
-        .log-warning { background: rgba(255, 193, 7, 0.2); }
-        .log-debug { background: rgba(108, 117, 125, 0.2); }
-        
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-        
-        .status-online { background: #28a745; }
-        .status-offline { background: #dc3545; }
-        .status-loading { background: #ffc107; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>�� Тестовый миниапп (Точная копия first.html)</h1>
+        <h1>🎮 Простой тест (точная копия first.html)</h1>
         
-        <div class="button-group">
-            <button id="btn1">Тест 1: Точная копия first.html</button>
-            <button id="btn2">Тест 2: WebApp.sendData()</button>
-            <button id="btn3">Тест 3: Простой fetch</button>
-        </div>
+        <button onclick="testFetch()">Тест fetch (как в first.html)</button>
+        <button onclick="testWebApp()">Тест WebApp.sendData()</button>
         
-        <div class="log-container" id="logContainer">
-            <div class="log-entry log-info">🚀 Миниапп загружен. Ожидание действий...</div>
+        <div class="log" id="log">
+            <div>🚀 Готов к тестированию...</div>
         </div>
     </div>
     
     <script>
         const tg = window.Telegram.WebApp;
-        const logContainer = document.getElementById('logContainer');
-        
-        // URL Worker'а
+        const logDiv = document.getElementById('log');
         const WORKER_URL = 'https://test-bot-worker.minuales.workers.dev';
         
-        function log(message, type = 'info') {
+        function log(message) {
             const timestamp = new Date().toLocaleTimeString();
             const logEntry = document.createElement('div');
-            logEntry.className = `log-entry log-${type}`;
-            
-            let statusIcon = '';
-            if (type === 'success') statusIcon = '<span class="status-indicator status-online"></span>';
-            else if (type === 'error') statusIcon = '<span class="status-indicator status-offline"></span>';
-            else if (type === 'warning') statusIcon = '<span class="status-indicator status-loading"></span>';
-            
-            logEntry.innerHTML = `${statusIcon}[${timestamp}] ${message}`;
-            logContainer.appendChild(logEntry);
-            logContainer.scrollTop = logContainer.scrollHeight;
-            console.log(`[${type.toUpperCase()}] ${message}`);
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
         }
         
-        // Инициализация WebApp
+        // Инициализация
         try {
             tg.ready();
             tg.expand();
-            log('✅ Telegram WebApp инициализирован', 'success');
+            log('✅ WebApp инициализирован');
+            log(`User ID: ${tg.initDataUnsafe.user?.id}`);
         } catch (error) {
-            log(`❌ Ошибка инициализации WebApp: ${error.message}`, 'error');
-        }
-        
-        // Логируем информацию о пользователе
-        try {
-            log('📊 Информация о WebApp:', 'info');
-            log(`User ID: ${tg.initDataUnsafe.user?.id}`, 'info');
-            log(`First Name: ${tg.initDataUnsafe.user?.first_name}`, 'info');
-            log(`Username: ${tg.initDataUnsafe.user?.username}`, 'info');
-            log(`Language: ${tg.initDataUnsafe.user?.language_code}`, 'info');
-            log(`Platform: ${tg.platform}`, 'info');
-            log(`Version: ${tg.version}`, 'info');
-        } catch (error) {
-            log(`❌ Ошибка получения информации о пользователе: ${error.message}`, 'error');
+            log(`❌ Ошибка инициализации: ${error.message}`);
         }
         
         // Тест 1: Точная копия first.html
-        document.getElementById('btn1').addEventListener('click', async () => {
-            log('=== ТЕСТ 1: Точная копия first.html ===', 'info');
+        async function testFetch() {
+            log('=== ТЕСТ FETCH (как в first.html) ===');
             
             const userId = tg.initDataUnsafe?.user?.id;
-            log(`User ID: ${userId}`, 'info');
+            log(`User ID: ${userId}`);
             
             alert('userId: ' + userId);
             if (!userId) {
-                log('❌ Ошибка: не удалось получить user_id', 'error');
+                log('❌ Ошибка: не удалось получить user_id');
                 alert('Ошибка: не удалось получить user_id');
                 return;
             }
             
             try {
-                log('📤 Пробуем отправить fetch...', 'info');
+                log('📤 Пробуем отправить fetch...');
                 alert('Пробуем отправить fetch...');
                 
                 const response = await fetch(WORKER_URL, {
@@ -181,26 +117,26 @@
                 });
                 
                 const result = await response.text();
-                log(`📥 Ответ сервера: ${result}`, 'success');
+                log(`📥 Ответ сервера: ${result}`);
                 alert('Ответ сервера: ' + result);
                 alert('hello');
                 tg.close();
                 
             } catch (err) {
-                log(`❌ Ошибка при отправке: ${err.message}`, 'error');
+                log(`❌ Ошибка при отправке: ${err.message}`);
                 alert('Ошибка при отправке: ' + err.message);
             }
-        });
+        }
         
         // Тест 2: WebApp.sendData()
-        document.getElementById('btn2').addEventListener('click', async () => {
-            log('=== ТЕСТ 2: WebApp.sendData() ===', 'info');
+        function testWebApp() {
+            log('=== ТЕСТ WebApp.sendData() ===');
             
             const userId = tg.initDataUnsafe?.user?.id;
-            log(`User ID: ${userId}`, 'info');
+            log(`User ID: ${userId}`);
             
             if (!userId) {
-                log('❌ Ошибка: не удалось получить user_id', 'error');
+                log('❌ Ошибка: не удалось получить user_id');
                 alert('Ошибка: не удалось получить user_id');
                 return;
             }
@@ -212,54 +148,20 @@
                     test: 'webapp_senddata'
                 };
                 
-                log(`📤 Отправляем через WebApp.sendData(): ${JSON.stringify(data)}`, 'info');
+                log(`📤 Отправляем через WebApp.sendData(): ${JSON.stringify(data)}`);
                 alert('Отправляем через WebApp.sendData()...');
                 
                 tg.sendData(JSON.stringify(data));
-                log('✅ WebApp.sendData() выполнен', 'success');
+                log('✅ WebApp.sendData() выполнен');
                 alert('WebApp.sendData() выполнен!');
                 
             } catch (err) {
-                log(`❌ Ошибка WebApp.sendData(): ${err.message}`, 'error');
+                log(`❌ Ошибка WebApp.sendData(): ${err.message}`);
                 alert('Ошибка WebApp.sendData(): ' + err.message);
             }
-        });
+        }
         
-        // Тест 3: Простой fetch (без tg.close())
-        document.getElementById('btn3').addEventListener('click', async () => {
-            log('=== ТЕСТ 3: Простой fetch ===', 'info');
-            
-            const userId = tg.initDataUnsafe?.user?.id;
-            log(`User ID: ${userId}`, 'info');
-            
-            if (!userId) {
-                log('❌ Ошибка: не удалось получить user_id', 'error');
-                alert('Ошибка: не удалось получить user_id');
-                return;
-            }
-            
-            try {
-                log('📤 Пробуем отправить fetch...', 'info');
-                alert('Пробуем отправить fetch...');
-                
-                const response = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId })
-                });
-                
-                const result = await response.text();
-                log(`📥 Ответ сервера: ${result}`, 'success');
-                alert('Ответ сервера: ' + result);
-                alert('Тест 3 завершен!');
-                
-            } catch (err) {
-                log(`❌ Ошибка при отправке: ${err.message}`, 'error');
-                alert('Ошибка при отправке: ' + err.message);
-            }
-        });
-        
-        log('🎯 Миниапп готов к работе!', 'success');
+        log('🎯 Готов к работе!');
     </script>
 </body>
 </html> 
