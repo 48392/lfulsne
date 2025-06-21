@@ -3,415 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎰 Слот Машина - Online Mini App</title>
+    <title>Slot Machine Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            padding: 20px;
+            justify-content: center;
         }
-
+        
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             text-align: center;
             max-width: 400px;
             width: 100%;
         }
-
-        .title {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
+        
         .slot-machine {
-            background: #2c3e50;
-            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.3);
             padding: 20px;
+            border-radius: 15px;
             margin: 20px 0;
-            border: 3px solid #34495e;
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
-
-        .slot-display {
-            background: #ecf0f1;
-            border-radius: 10px;
-            padding: 15px;
-            font-size: 32px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            min-height: 60px;
+        
+        .reels {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid #bdc3c7;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-size: 2em;
         }
-
-        .spin-button {
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 10px;
-            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
-        }
-
-        .spin-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
-        }
-
-        .spin-button:active {
-            transform: translateY(0);
-        }
-
-        .bonus-button {
-            background: linear-gradient(45deg, #f39c12, #e67e22);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 10px;
-            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
-        }
-
-        .bonus-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.4);
-        }
-
-        .bonus-button:active {
-            transform: translateY(0);
-        }
-
-        .status {
-            margin-top: 20px;
+        
+        .reel {
+            background: rgba(255, 255, 255, 0.1);
             padding: 10px;
             border-radius: 10px;
-            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
         }
-
-        .status.success {
-            background: #d5f4e6;
-            color: #27ae60;
-            border: 2px solid #2ecc71;
+        
+        .coins {
+            font-size: 1.5em;
+            margin: 20px 0;
+            color: #ffd700;
         }
-
-        .status.error {
-            background: #fadbd8;
-            color: #e74c3c;
-            border: 2px solid #e74c3c;
+        
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 200px;
         }
-
-        .status.info {
-            background: #d6eaf8;
-            color: #3498db;
-            border: 2px solid #3498db;
+        
+        button:hover {
+            transform: translateY(-2px);
         }
-
-        .log {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            padding: 15px;
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
             margin-top: 20px;
-            max-height: 200px;
-            overflow-y: auto;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            white-space: pre-wrap;
             font-family: monospace;
             font-size: 12px;
-            text-align: left;
-        }
-
-        .log-entry {
-            margin-bottom: 5px;
-            padding: 2px 0;
-        }
-
-        .log-entry.success {
-            color: #27ae60;
-        }
-
-        .log-entry.error {
-            color: #e74c3c;
-        }
-
-        .log-entry.info {
-            color: #3498db;
-        }
-
-        .spinning {
-            animation: spin 0.5s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotateY(0deg); }
-            100% { transform: rotateY(360deg); }
-        }
-
-        .coins {
-            background: linear-gradient(45deg, #f1c40f, #f39c12);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            margin: 10px 0;
-            display: inline-block;
+            max-height: 200px;
+            overflow-y: auto;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="title">🎰 Слот Машина</h1>
-        <div class="coins">💰 Монеты: <span id="coins">1000</span></div>
+        <h1>🎰 Slot Machine</h1>
+        
+        <div class="coins">
+            💰 Монеты: <span id="coins">1000</span>
+        </div>
         
         <div class="slot-machine">
-            <div class="slot-display" id="slotDisplay">🎰🎰🎰</div>
-            <button class="spin-button" id="spinButton" onclick="spin()">🎲 Крутить</button>
-            <button class="bonus-button" id="bonusButton" onclick="claimBonus()">🎁 Забрать бонус</button>
+            <div class="reels">
+                <div class="reel" id="reel1">🍎</div>
+                <div class="reel" id="reel2">🍊</div>
+                <div class="reel" id="reel3">🍇</div>
+            </div>
         </div>
-
-        <div class="status info" id="status">
-            Готов к игре! Нажмите "Крутить" чтобы начать
-        </div>
-
-        <div class="log" id="log">
-            <div class="log-entry info">🚀 Online Mini App загружен</div>
-            <div class="log-entry info">📡 Worker: https://slavka-bot-webhook.minuales.workers.dev</div>
-        </div>
+        
+        <button onclick="spin()" id="spinBtn">🎰 Крутить</button>
+        <button onclick="claimBonus()" id="claimBtn">🎁 Забрать бонус</button>
+        
+        <div id="result" class="result" style="display: none;"></div>
     </div>
 
     <script>
+        let tg = window.Telegram.WebApp;
         let coins = 1000;
-        let isSpinning = false;
         let lastResult = null;
-
-        // Символы для слот машины
+        
+        // Инициализация Telegram Mini App
+        tg.ready();
+        tg.expand();
+        
+        // Символы для слот-машины
         const symbols = ['🍎', '🍊', '🍇', '🍒', '🍋', '💎', '7️⃣', '🎰'];
         
-        // Обновляем отображение монет
         function updateCoins() {
             document.getElementById('coins').textContent = coins;
         }
-
-        // Логирование
-        function log(message, type = 'info') {
-            const logDiv = document.getElementById('log');
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${type}`;
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            logDiv.appendChild(entry);
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
-
-        // Обновление статуса
-        function updateStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
-        }
-
-        // Кручение слот машины
+        
         function spin() {
-            if (isSpinning) return;
+            const spinBtn = document.getElementById('spinBtn');
+            spinBtn.disabled = true;
+            spinBtn.textContent = '🔄 Крутится...';
             
-            if (coins < 10) {
-                updateStatus('Недостаточно монет!', 'error');
-                log('❌ Недостаточно монет для спина', 'error');
-                return;
-            }
-
-            isSpinning = true;
-            coins -= 10;
-            updateCoins();
+            // Анимация вращения
+            const reels = [
+                document.getElementById('reel1'),
+                document.getElementById('reel2'),
+                document.getElementById('reel3')
+            ];
             
-            const spinButton = document.getElementById('spinButton');
-            const slotDisplay = document.getElementById('slotDisplay');
+            let spins = 0;
+            const maxSpins = 20;
             
-            spinButton.disabled = true;
-            slotDisplay.classList.add('spinning');
-            updateStatus('🎰 Крутим...', 'info');
-            log('🎰 Начинаем спин', 'info');
-
-            // Анимация спина
-            let spinCount = 0;
             const spinInterval = setInterval(() => {
-                const result = symbols[Math.floor(Math.random() * symbols.length)] + 
-                             symbols[Math.floor(Math.random() * symbols.length)] + 
-                             symbols[Math.floor(Math.random() * symbols.length)];
-                slotDisplay.textContent = result;
-                spinCount++;
+                reels.forEach(reel => {
+                    reel.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                });
                 
-                if (spinCount >= 10) {
+                spins++;
+                if (spins >= maxSpins) {
                     clearInterval(spinInterval);
-                    finishSpin();
+                    
+                    // Финальный результат
+                    const result = [
+                        symbols[Math.floor(Math.random() * symbols.length)],
+                        symbols[Math.floor(Math.random() * symbols.length)],
+                        symbols[Math.floor(Math.random() * symbols.length)]
+                    ];
+                    
+                    reels.forEach((reel, index) => {
+                        reel.textContent = result[index];
+                    });
+                    
+                    // Проверяем выигрыш
+                    if (result[0] === result[1] && result[1] === result[2]) {
+                        const winAmount = 500;
+                        coins += winAmount;
+                        lastResult = `🎉 ДЖЕКПОТ! Выигрыш: ${winAmount} монет!`;
+                        showResult(`🎉 ДЖЕКПОТ! Выигрыш: ${winAmount} монет!\nСимволы: ${result.join(' ')}`);
+                    } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
+                        const winAmount = 100;
+                        coins += winAmount;
+                        lastResult = `🎊 Выигрыш: ${winAmount} монет!`;
+                        showResult(`🎊 Выигрыш: ${winAmount} монет!\nСимволы: ${result.join(' ')}`);
+                    } else {
+                        coins -= 50;
+                        lastResult = `😔 Проигрыш: -50 монет`;
+                        showResult(`😔 Проигрыш: -50 монет\nСимволы: ${result.join(' ')}`);
+                    }
+                    
+                    updateCoins();
+                    spinBtn.disabled = false;
+                    spinBtn.textContent = '🎰 Крутить';
                 }
             }, 100);
         }
-
-        // Завершение спина
-        function finishSpin() {
-            const spinButton = document.getElementById('spinButton');
-            const slotDisplay = document.getElementById('slotDisplay');
-            
-            isSpinning = false;
-            spinButton.disabled = false;
-            slotDisplay.classList.remove('spinning');
-            
-            // Финальный результат
-            const symbol1 = symbols[Math.floor(Math.random() * symbols.length)];
-            const symbol2 = symbols[Math.floor(Math.random() * symbols.length)];
-            const symbol3 = symbols[Math.floor(Math.random() * symbols.length)];
-            
-            lastResult = symbol1 + symbol2 + symbol3;
-            slotDisplay.textContent = lastResult;
-            
-            // Проверяем выигрыш
-            if (symbol1 === symbol2 && symbol2 === symbol3) {
-                const winAmount = 100;
-                coins += winAmount;
-                updateStatus(`🎉 ДЖЕКПОТ! Выигрыш: ${winAmount} монет!`, 'success');
-                log(`🎉 ДЖЕКПОТ! Выигрыш: ${winAmount} монет`, 'success');
-            } else if (symbol1 === symbol2 || symbol2 === symbol3 || symbol1 === symbol3) {
-                const winAmount = 20;
-                coins += winAmount;
-                updateStatus(`🎊 Выигрыш: ${winAmount} монет!`, 'success');
-                log(`🎊 Выигрыш: ${winAmount} монет`, 'success');
-            } else {
-                updateStatus('😔 Попробуйте еще раз!', 'error');
-                log('😔 Проигрыш', 'error');
-            }
-            
-            updateCoins();
-        }
-
-        // Забрать бонус
+        
         async function claimBonus() {
-            if (isSpinning) return;
-            
-            updateStatus('🎁 Отправляем данные о бонусе...', 'info');
-            log('🎁 Начинаем отправку данных о бонусе', 'info');
-            
-            // Получаем данные Telegram WebApp
-            const tg = window.Telegram?.WebApp;
-            let user_id = null;
-            let initData = null;
-            
-            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
-                user_id = tg.initDataUnsafe.user.id;
-                initData = tg.initData;
-                log(`👤 Получен user_id из Telegram: ${user_id}`, 'info');
-            } else {
-                // Fallback для тестирования в браузере
-                user_id = 7167238342;
-                log(`👤 Используем тестовый user_id: ${user_id}`, 'info');
-            }
-            
-            const bonusData = {
-                user_id: user_id,
-                miniapp: 'slot_machine_online',
-                event: 'claim_bonus',
-                coins: coins,
-                last_result: lastResult,
-                timestamp: new Date().toISOString(),
-                tgWebAppData: initData,
-                source: 'online_miniapp'
-            };
+            const claimBtn = document.getElementById('claimBtn');
+            claimBtn.disabled = true;
+            claimBtn.textContent = '🔄 Отправляем...';
             
             try {
-                log(`📤 Отправляем данные на Worker: ${JSON.stringify(bonusData)}`, 'info');
+                // Получаем данные пользователя из Telegram
+                const user = tg.initDataUnsafe?.user;
+                const userId = user?.id || 7167238342; // Fallback ID
                 
-                const response = await fetch('https://slavka-bot-webhook.minuales.workers.dev', {
+                // Данные для отправки в Worker
+                const data = {
+                    user_id: userId,
+                    miniapp: 'slot_machine_webapp',
+                    event: 'claim_bonus',
+                    coins: coins,
+                    last_result: lastResult,
+                    timestamp: new Date().toISOString(),
+                    source: 'telegram_miniapp',
+                    user_info: {
+                        id: user?.id,
+                        first_name: user?.first_name,
+                        last_name: user?.last_name,
+                        username: user?.username
+                    }
+                };
+                
+                console.log('📤 Отправляем данные в Worker:', data);
+                
+                // Отправляем fetch запрос в Worker
+                const response = await fetch('https://slavka-bot-webhook.minuales.workers.dev/', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(bonusData)
+                    body: JSON.stringify(data)
                 });
                 
                 const result = await response.json();
-                log(`📥 Ответ от Worker: ${JSON.stringify(result)}`, 'info');
+                console.log('📥 Ответ от Worker:', result);
                 
-                if (response.ok && result.status === 'success') {
-                    updateStatus('✅ Бонус отправлен! Проверьте Telegram', 'success');
-                    log('✅ Данные успешно отправлены на Worker', 'success');
+                if (response.ok) {
+                    showResult(`✅ Бонус успешно отправлен!
+
+📤 Данные:
+${JSON.stringify(data, null, 2)}
+
+📥 Ответ:
+${JSON.stringify(result, null, 2)}
+
+🎉 Проверьте Telegram - должно прийти сообщение!`);
                     
-                    // Добавляем бонусные монеты
-                    const bonusCoins = 500;
-                    coins += bonusCoins;
-                    updateCoins();
-                    
-                    log(`💰 Получен бонус: +${bonusCoins} монет`, 'success');
-                    
-                    // Закрываем миниапп через 3 секунды
+                    // Закрываем Mini App
                     setTimeout(() => {
-                        log('🔒 Закрываем миниапп через 3 секунды...', 'info');
-                        updateStatus('🔒 Закрытие миниаппа...', 'info');
-                        
-                        if (tg && tg.close) {
-                            tg.close();
-                            log('✅ Миниапп закрыт через Telegram API', 'success');
-                        } else {
-                            log('✅ Миниапп закрыт (имитация)', 'success');
-                        }
+                        tg.close();
                     }, 3000);
-                    
                 } else {
-                    throw new Error(result.message || 'Неизвестная ошибка');
+                    throw new Error(`Worker ошибка: ${result.error || 'Неизвестная ошибка'}`);
                 }
                 
             } catch (error) {
-                updateStatus(`❌ Ошибка: ${error.message}`, 'error');
-                log(`❌ Ошибка отправки: ${error.message}`, 'error');
+                console.error('❌ Ошибка:', error);
+                showResult(`❌ Ошибка отправки: ${error.message}`);
+                claimBtn.disabled = false;
+                claimBtn.textContent = '🎁 Забрать бонус';
             }
         }
-
-        // Обработка касаний для мобильных устройств
+        
+        function showResult(message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = message;
+        }
+        
+        // Обработка touch событий для мобильных устройств
         document.addEventListener('touchstart', function(e) {
             e.preventDefault();
         }, { passive: false });
-
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
-            log('🎮 Игра готова к запуску', 'info');
-            updateStatus('🎮 Готов к игре! Нажмите "Крутить"', 'info');
-            
-            // Инициализируем Telegram WebApp
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.ready();
-                log('📱 Telegram WebApp инициализирован', 'success');
-            } else {
-                log('⚠️ Telegram WebApp не найден (тестирование в браузере)', 'info');
-            }
-        });
-
-        // Обработка ошибок
-        window.addEventListener('error', function(e) {
-            log(`❌ Ошибка JavaScript: ${e.message}`, 'error');
-        });
+        
+        // Логирование для отладки
+        console.log('🎮 Mini App загружен');
+        console.log('👤 Telegram пользователь:', tg.initDataUnsafe?.user);
+        console.log('🔗 Worker URL: https://slavka-bot-webhook.minuales.workers.dev/');
     </script>
 </body>
 </html> 
