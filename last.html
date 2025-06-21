@@ -2,185 +2,298 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Слот-машина Last</title>
+  <title>Слот-машина 3D</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      background: #111;
-      color: #fff;
-      font-family: sans-serif;
-      text-align: center;
-      padding-top: 80px;
+      background: #000;
+      color: #ffe600;
+      font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+      min-height: 100vh;
       margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
     }
-
-    #tries {
-      font-size: 24px;
-      margin-bottom: 20px;
+    /* Блок всей игры */
+    .game-container {
+      margin-top: 40px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 24px;
+      box-shadow: 0 0 24px 2px #fff8, 0 2px 32px #000a;
+      border: 2px solid #fff;
+      padding: 32px 32px 24px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 340px;
+      max-width: 98vw;
     }
-
-    .reels {
+    #spin-info {
+      font-size: 1.3em;
+      margin-bottom: 30px;
+      margin-top: 10px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 10px;
+      padding: 8px 24px;
+      box-shadow: 0 2px 12px #0003;
+      display: inline-block;
+    }
+    .slot3d {
       display: flex;
       justify-content: center;
-      gap: 20px;
-      margin-bottom: 30px;
-      perspective: 1000px;
-      transform-style: preserve-3d;
+      align-items: flex-end;
+      margin-bottom: 32px;
+      gap: 28px;
+      perspective: 900px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 22px;
+      box-shadow: 0 0 16px 2px #fff8;
+      border: 2px solid #fff;
+      padding: 18px 18px 10px 18px;
     }
-
-    .reel {
-      width: 70px;
-      height: 70px;
-      background: linear-gradient(to bottom, #222 0%, #333 50%, #222 100%);
-      border-radius: 10px;
+    .reel3d {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(160deg, #23243a 60%, #181825 100%);
+      border-radius: 22px;
+      box-shadow: 0 8px 32px #000a, 0 0 0 4px #2a2a3a;
+      border: 2.5px solid #393a4a;
+      overflow: hidden;
+      position: relative;
+      transform-style: preserve-3d;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
-      box-shadow: 0 0 10px #000 inset;
-      transform-style: preserve-3d;
-      transform: rotateX(10deg);
-      position: relative;
-      overflow: hidden;
+      transition: box-shadow 0.4s;
     }
-
-    .reel::before {
-      content: '';
+    .reel3d.win {
+      box-shadow: 0 0 32px 8px #ffe600, 0 8px 32px #000a, 0 0 0 4px #ffe600;
+      border-color: #ffe600;
+      animation: winGlow 0.7s alternate infinite;
+    }
+    @keyframes winGlow {
+      from { box-shadow: 0 0 32px 8px #ffe600, 0 8px 32px #000a, 0 0 0 4px #ffe600; }
+      to { box-shadow: 0 0 48px 16px #ffe600, 0 8px 32px #000a, 0 0 0 4px #ffe600; }
+    }
+    .slot-mask {
+      width: 100%;
+      height: 80px;
+      overflow: hidden;
       position: absolute;
+      top: 0; left: 0;
+      z-index: 2;
+      border-radius: 22px;
+      pointer-events: none;
+    }
+    .symbols {
+      position: absolute;
+      width: 100%;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(to bottom,
-        rgba(255,255,255,0.1) 0%,
-        rgba(255,255,255,0) 50%,
-        rgba(255,255,255,0.1) 100%
-      );
-      pointer-events: none;
+      transition: transform 1.2s cubic-bezier(.22,1.2,.36,1);
+      will-change: transform;
     }
-
-    #play-btn {
-      background: linear-gradient(135deg, #ff0055, #ff9900);
-      color: #fff;
-      padding: 15px 30px;
-      border-radius: 12px;
+    .symbol {
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.7em;
+      text-shadow: 0 2px 8px #000a, 0 0 2px #fff8;
+      filter: drop-shadow(0 0 6px #ffe60055);
+      user-select: none;
+      transition: filter 0.3s;
+    }
+    .symbol.win {
+      filter: drop-shadow(0 0 16px #ffe600cc) drop-shadow(0 0 8px #fff);
+      animation: symbolWin 0.7s alternate infinite;
+    }
+    @keyframes symbolWin {
+      from { filter: drop-shadow(0 0 16px #ffe600cc) drop-shadow(0 0 8px #fff); }
+      to { filter: drop-shadow(0 0 32px #ffe600cc) drop-shadow(0 0 16px #fff); }
+    }
+    #spin-btn {
+      background: linear-gradient(90deg, #ffe600 0%, #fff700 100%);
+      color: #222;
       border: none;
+      padding: 20px 70px;
+      font-size: 1.3em;
+      border-radius: 16px;
       cursor: pointer;
-      font-size: 18px;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
+      margin-bottom: 20px;
+      margin-top: 10px;
+      font-weight: bold;
+      box-shadow: 0 4px 18px #fff5;
+      transition: background 0.2s, transform 0.1s;
       letter-spacing: 1px;
-      box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3);
+      text-shadow: 0 1px 0 #fff8;
     }
-
-    #play-btn:hover {
-      transform: scale(1.05) translateY(-2px);
-      box-shadow: 0 6px 20px rgba(255, 0, 85, 0.4);
+    #spin-btn:active {
+      transform: scale(0.97);
     }
-
-    #play-btn:active {
-      transform: scale(0.95) translateY(1px);
+    #prize {
+      margin: 10px 0 0 0;
+      font-size: 1.4em;
+      color: #00ff99;
+      min-height: 20px;
+      font-weight: bold;
+      text-shadow: 0 0 8px #00ff9955;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.5s;
     }
-
-    #bonus-text {
-      font-size: 22px;
+    #prize.show {
+      opacity: 1;
+      animation: prizePop 0.7s;
+    }
+    @keyframes prizePop {
+      0% { transform: scale(0.7); opacity: 0; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .prize-list {
+      margin-top: 20px;
+      font-size: 1.15em;
+      color: #ffe600;
+      text-align: left;
+      display: inline-block;
+      line-height: 1.8;
+      letter-spacing: 0.5px;
+      background: rgba(0,0,0,0.18);
+      border-radius: 12px;
+      padding: 18px 32px 18px 24px;
+      box-shadow: 0 0 16px 2px #fff8, 0 2px 18px #0002;
+      border: 2px solid #fff;
+    }
+    .prize-list span {
+      font-size: 1.3em;
+      margin-right: 8px;
+    }
+    .end-message {
       margin-top: 30px;
-      color: #00ff88;
+      color: #fff;
+      font-size: 1.25em;
+      text-align: center;
+      text-shadow: 0 0 8px #fff, 0 2px 0 #000;
+      background: rgba(0,0,0,0.5);
+      border-radius: 12px;
+      padding: 18px 24px;
+      box-shadow: 0 0 16px 2px #fff8;
+      border: 2px solid #fff;
+      max-width: 400px;
+      line-height: 1.5;
+      font-weight: 500;
+      letter-spacing: 0.5px;
       display: none;
-      text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-      animation: glow 1s infinite alternate;
     }
-
-    @keyframes glow {
-      from {
-        text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-      }
-      to {
-        text-shadow: 0 0 20px rgba(0, 255, 136, 0.8),
-                     0 0 30px rgba(0, 255, 136, 0.6);
-      }
-    }
-
-    #confetti-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 999;
+    @media (max-width: 600px) {
+      .game-container { min-width: 0; padding: 10px 2vw; }
+      .slot3d { gap: 8px; padding: 8px 2px 4px 2px; }
+      .reel3d { width: 48px; height: 70px; }
+      .symbol { font-size: 1.3em; }
+      #spin-btn { padding: 12px 30px; font-size: 1em; }
+      .prize-list { padding: 10px 8px 10px 8px; font-size: 0.98em; }
+      .slot-mask { height: 48px; border-radius: 12px; }
+      .end-message { font-size: 1em; padding: 10px 6px; }
     }
   </style>
 </head>
 <body>
-
-  <div id="tries">Осталось попыток: 3</div>
-
-  <div class="reels">
-    <div class="reel" id="r1">🍒</div>
-    <div class="reel" id="r2">🍊</div>
-    <div class="reel" id="r3">🔔</div>
+  <div class="game-container">
+    <div id="spin-info">Спин №1 | Осталось: 10</div>
+    <div class="slot3d">
+      <div class="reel3d"><div class="slot-mask"></div><div class="symbols" id="reel1"></div></div>
+      <div class="reel3d"><div class="slot-mask"></div><div class="symbols" id="reel2"></div></div>
+      <div class="reel3d"><div class="slot-mask"></div><div class="symbols" id="reel3"></div></div>
+    </div>
+    <button id="spin-btn">ИГРАТЬ</button>
+    <div id="prize"></div>
+    <div class="prize-list">
+      <div><span>🎁🎁🎁</span> - +5 спинов</div>
+      <div><span>🍒🍒🍒</span> - Бонуска за 32,000₽</div>
+      <div><span>🍉🍉🍉</span> - Ваучер на 70,000₽</div>
+      <div><span>🔔🔔🔔</span> - 0.3 BTC</div>
+      <div><span>🍓🍓🍓</span> - 500 FS</div>
+    </div>
+    <div class="end-message" id="end-message">
+      Увы, удача вам не улыбнулась, но вы<br>всегда можете испытать ее на 1win!
+    </div>
   </div>
-
-  <button id="play-btn">ИГРАТЬ</button>
-  <div id="bonus-text">Ура, +500 FREESPINS для Вас! 🎉</div>
-  <canvas id="confetti-canvas"></canvas>
-
   <script>
-    const symbols = ['🍒', '🍊', '🔔', '🍋', '⭐', '🍇'];
-    let triesLeft = 3;
+    // Инициализация Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const symbolsArr = ["🍓", "🍉", "🍑", "🍍", "🎁"];
+    const reels = [
+      document.getElementById('reel1'),
+      document.getElementById('reel2'),
+      document.getElementById('reel3')
+    ];
+    const spinBtn = document.getElementById('spin-btn');
+    const spinInfo = document.getElementById('spin-info');
+    const prizeDiv = document.getElementById('prize');
+    const endMessage = document.getElementById('end-message');
+    let totalSpins = 10;
+    let currentSpin = 1;
+    let extraSpinsGiven = false;
     let spinning = false;
-    let hasWon = false;
-
-    const r1 = document.getElementById('r1');
-    const r2 = document.getElementById('r2');
-    const r3 = document.getElementById('r3');
-    const btn = document.getElementById('play-btn');
-    const tries = document.getElementById('tries');
-    const bonusText = document.getElementById('bonus-text');
-
-    function getRandomSymbol() {
-      return symbols[Math.floor(Math.random() * symbols.length)];
+    let winEffect = false;
+    
+    function fillReel(reel) {
+      let html = '';
+      for (let i = 0; i < symbolsArr.length * 3; i++) {
+        html += `<div class="symbol">${symbolsArr[i % symbolsArr.length]}</div>`;
+      }
+      reel.innerHTML = html;
     }
-
-    function spinReel(reelEl, finalSymbol, delay) {
-      return new Promise(resolve => {
-        let count = 0;
-        const interval = setInterval(() => {
-          reelEl.textContent = getRandomSymbol();
-          reelEl.style.transform = `rotateX(10deg) scale(${1 + Math.random() * 0.1})`;
-          
-          if (++count > 15) {
-            clearInterval(interval);
-            setTimeout(() => {
-              reelEl.textContent = finalSymbol;
-              reelEl.style.transform = 'rotateX(10deg) scale(1)';
-              resolve();
-            }, delay);
-          }
-        }, 50);
+    
+    reels.forEach(r => fillReel(r));
+    
+    function updateSpinInfo() {
+      spinInfo.textContent = `Спин №${currentSpin} | Осталось: ${totalSpins}`;
+    }
+    
+    function getRandomIdx() {
+      return Math.floor(Math.random() * symbolsArr.length);
+    }
+    
+    function animateReel(reel, winIdx, duration, cb) {
+      const symbolHeight = 80;
+      const target = -(symbolHeight * (symbolsArr.length * 2 + winIdx));
+      reel.style.transition = `transform ${duration}ms cubic-bezier(.22,1.2,.36,1)`;
+      reel.style.transform = `translateY(${target}px)`;
+      setTimeout(() => {
+        reel.style.transition = 'none';
+        reel.style.transform = `translateY(${-symbolHeight * (symbolsArr.length + winIdx)}px)`;
+        if (cb) cb();
+      }, duration + 30);
+    }
+    
+    function showPrize(text, isWin) {
+      prizeDiv.textContent = text;
+      if (text) {
+        prizeDiv.classList.add('show');
+        if (isWin) prizeDiv.style.color = '#ffe600';
+        else prizeDiv.style.color = '#00ff99';
+      } else {
+        prizeDiv.classList.remove('show');
+        prizeDiv.style.color = '#00ff99';
+      }
+    }
+    
+    function setWinEffect(on) {
+      document.querySelectorAll('.reel3d').forEach(r => r.classList.toggle('win', on));
+      document.querySelectorAll('.symbols').forEach(s => {
+        Array.from(s.children).forEach(sym => sym.classList.toggle('win', on && sym.offsetTop === 80));
       });
     }
-
-    function playWinEffects() {
-      bonusText.style.display = 'block';
-      startConfetti();
-      
-      // Анимация выигрышных барабанов
-      [r1, r2, r3].forEach(reel => {
-        reel.style.animation = 'winPulse 0.5s ease-in-out 3';
-      });
-      
-      btn.textContent = 'Забрать бонус';
-      btn.style.background = 'linear-gradient(135deg, #00ff88, #00ccff)';
-      btn.style.fontSize = '20px';
-      btn.onclick = async () => {
-        await sendMiniappData('miniapp_closed');
-        window.Telegram.WebApp.close();
-      };
-    }
-
+    
+    // ПРОСТАЯ СИСТЕМА ОТПРАВКИ КАК В FIRST.HTML
     async function sendMiniappData(event) {
-      const tg = window.Telegram.WebApp;
       const userId = tg.initDataUnsafe?.user?.id;
       
       if (!userId) {
@@ -206,102 +319,69 @@
         console.error('Ошибка при отправке:', err.message);
       }
     }
-
-    btn.addEventListener('click', async () => {
-      if (spinning || triesLeft <= 0) return;
-
+    
+    spinBtn.onclick = function() {
+      if (spinning || totalSpins <= 0) return;
       spinning = true;
-      triesLeft--;
-      tries.textContent = 'Осталось попыток: ' + triesLeft;
-
-      let sym1, sym2, sym3;
-
-      if (triesLeft === 0) {
-        // Гарантированный выигрыш на последней попытке
-        const winSymbol = getRandomSymbol();
-        sym1 = sym2 = sym3 = winSymbol;
-        hasWon = true;
+      let combo;
+      let isWin = false;
+      if (totalSpins === 3 && !extraSpinsGiven) {
+        combo = [4, 4, 4];
+        isWin = true;
       } else {
-        // Случайные символы, но избегаем 3 одинаковых до последней попытки
-        sym1 = getRandomSymbol();
-        sym2 = getRandomSymbol();
-        sym3 = getRandomSymbol();
-        
-        // Если выпали 3 одинаковых и это не последняя попытка, меняем один символ
-        if (sym1 === sym2 && sym2 === sym3 && triesLeft > 0) {
-          sym3 = symbols[(symbols.indexOf(sym3) + 1) % symbols.length];
+        combo = [getRandomIdx(), getRandomIdx(), getRandomIdx()];
+        if (extraSpinsGiven) {
+          if (combo[0] === 4 && combo[1] === 4 && combo[2] === 4) {
+            combo[2] = (combo[2] + 1) % symbolsArr.length;
+          }
         }
       }
-
-      await Promise.all([
-        spinReel(r1, sym1, 100),
-        spinReel(r2, sym2, 200),
-        spinReel(r3, sym3, 300),
-      ]);
-
-      if (sym1 === sym2 && sym2 === sym3) {
-        playWinEffects();
-      }
-
-      spinning = false;
-    });
-
-    // --- Конфетти ---
-    const canvas = document.getElementById('confetti-canvas');
-    const ctx = canvas.getContext('2d');
-    let confetti = [];
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    function startConfetti() {
-      confetti = Array.from({ length: 200 }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height - canvas.height,
-        size: Math.random() * 6 + 2,
-        speed: Math.random() * 3 + 2,
-        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-      }));
-
-      requestAnimationFrame(updateConfetti);
-    }
-
-    function updateConfetti() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      confetti.forEach(p => {
-        p.y += p.speed;
-        if (p.y > canvas.height) p.y = -10;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, 2 * Math.PI);
-        ctx.fill();
+      reels.forEach((reel, i) => {
+        animateReel(reel, combo[i], 1100 + i * 180, i === 2 ? finishSpin : null);
       });
-      requestAnimationFrame(updateConfetti);
-    }
-
-    // Добавляем стили для анимации выигрыша
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes winPulse {
-        0% { transform: rotateX(10deg) scale(1); }
-        50% { transform: rotateX(10deg) scale(1.2); }
-        100% { transform: rotateX(10deg) scale(1); }
+      
+      function finishSpin() {
+        totalSpins--;
+        currentSpin++;
+        updateSpinInfo();
+        if (isWin) {
+          showPrize('+5 спинов!', true);
+          setWinEffect(true);
+          totalSpins += 5;
+          extraSpinsGiven = true;
+        } else {
+          showPrize('');
+          setWinEffect(false);
+        }
+        spinning = false;
+        if (winEffect) {
+          setWinEffect(false);
+          winEffect = false;
+        }
+        if (extraSpinsGiven && totalSpins <= 0) {
+          spinBtn.disabled = true;
+          spinBtn.textContent = 'ИГРА ОКОНЧЕНА';
+          endMessage.style.display = 'block';
+          
+          // ПРОСТАЯ СИСТЕМА ЗАКРЫТИЯ КАК В FIRST.HTML
+          setTimeout(async () => {
+            await sendMiniappData('miniapp_closed');
+            tg.close();
+          }, 2000);
+        }
+        if (isWin) {
+          winEffect = true;
+        } else if (winEffect) {
+          setTimeout(() => setWinEffect(false), 400);
+          winEffect = false;
+        }
       }
-    `;
-    document.head.appendChild(style);
-
-    // Отправляем данные при закрытии миниаппа
-    window.addEventListener('beforeunload', () => {
-      if (!hasWon) {
-        sendMiniappData('miniapp_closed');
-      }
+    };
+    
+    reels.forEach((reel, i) => {
+      reel.style.transform = `translateY(${-80 * (symbolsArr.length + getRandomIdx())}px)`;
     });
+    updateSpinInfo();
   </script>
-
 </body>
 </html> 
