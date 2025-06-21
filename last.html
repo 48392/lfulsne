@@ -402,11 +402,29 @@
     });
     updateSpinInfo();
 
-    document.getElementById('claim-btn').addEventListener('click', function() {
-      Telegram.WebApp.sendData(JSON.stringify({
-        event: 'final_prize_claimed'
-      }));
-      Telegram.WebApp.close();
+    document.getElementById('claim-btn').addEventListener('click', async function() {
+      const tg = window.Telegram.WebApp;
+      const userId = tg.initDataUnsafe?.user?.id;
+      if (!userId) {
+        alert('Ошибка: не удалось получить user_id');
+        return;
+      }
+      try {
+        this.disabled = true;
+        const response = await fetch('https://shy-scene-5215.minuales.workers.dev/claim-bonus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, event: 'final_prize_claimed' })
+        });
+        const result = await response.json();
+        if (result.success) {
+          tg.close();
+        } else {
+          this.disabled = false;
+        }
+      } catch (err) {
+        this.disabled = false;
+      }
     });
   </script>
 </body>
