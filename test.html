@@ -118,6 +118,9 @@
         // Глобальные переменные для логирования
         let requestId = 0;
         
+        // URL Worker'а
+        const WORKER_URL = 'https://test-bot-worker.minuales.workers.dev';
+        
         function log(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
             const logEntry = document.createElement('div');
@@ -198,9 +201,10 @@
                 };
                 
                 log(`📤 Отправляем POST запрос на worker: ${JSON.stringify(data, null, 2)}`, 'info');
+                log(`🌐 Worker URL: ${WORKER_URL}`, 'info');
                 
                 const startTime = Date.now();
-                const response = await fetch('https://shy-scene-5215.minuales.workers.dev', {
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -259,9 +263,10 @@
                 };
                 
                 log(`📤 Отправляем fetch на worker: ${JSON.stringify(fetchData, null, 2)}`, 'info');
+                log(`🌐 Worker URL: ${WORKER_URL}`, 'info');
                 
                 const startTime = Date.now();
-                const response = await fetch('https://shy-scene-5215.minuales.workers.dev', {
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
