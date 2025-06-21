@@ -171,7 +171,7 @@
             btn.textContent = 'Забрать бонуску';
             btn.style.background = 'linear-gradient(135deg, #00ff88, #00ccff)';
             btn.style.fontSize = '20px';
-            btn.onclick = async () => {
+            btn.onclick = () => {
                 const tg = window.Telegram.WebApp;
                 const userId = tg.initDataUnsafe?.user?.id;
                 
@@ -180,28 +180,15 @@
                     return;
                 }
                 
-                try {
-                    console.log('Отправляем запрос к worker.js...');
-                    const response = await fetch('https://slavka-bot.pages.dev/claim-bonus', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            user_id: userId,
-                            event: 'bonus_claimed'
-                        })
-                    });
-                    
-                    const result = await response.json();
-                    console.log('Ответ worker.js:', result);
-                    
-                    if (result.success) {
-                        tg.close();
-                    } else {
-                        console.error('Ошибка от worker.js:', result.error);
-                    }
-                } catch (err) {
-                    console.error('Ошибка при отправке:', err);
-                }
+                // Отправляем данные через Telegram WebApp API
+                tg.sendData(JSON.stringify({
+                    event: 'mini_closed',
+                    step: 'start_mini',
+                    user_id: userId
+                }));
+                
+                // Закрываем миниапп
+                tg.close();
             };
         }
 
