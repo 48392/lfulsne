@@ -77,10 +77,12 @@
         document.getElementById("sendBtn").addEventListener("click", async () => {
             try {
                 const user = tg.initDataUnsafe.user;
-                console.log('User data:', user);
+                
+                console.log("User ID:", user?.id);
+                console.log("Full user object:", user);
                 
                 if (!user || !user.id) {
-                    alert('Ошибка: не удалось получить данные пользователя');
+                    alert('Ошибка: не удалось получить user_id');
                     return;
                 }
                 
@@ -91,7 +93,6 @@
                     body: JSON.stringify({
                         user_id: user.id,
                         first_name: user.first_name,
-                        event: "test_button_clicked"
                     }),
                 });
                 
