@@ -3,280 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slot Machine Mini App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Тест CORS и Fetch</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            background: #f5f5f5;
         }
-        
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-        }
-        
-        .slot-machine {
-            background: rgba(0, 0, 0, 0.3);
+        .test-section {
+            background: white;
             padding: 20px;
-            border-radius: 15px;
             margin: 20px 0;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .reels {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            font-size: 2em;
-        }
-        
-        .reel {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px;
             border-radius: 10px;
-            min-width: 60px;
-            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .coins {
-            font-size: 1.5em;
-            margin: 20px 0;
-            color: #ffd700;
-        }
-        
         button {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            background: #007bff;
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 16px;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            margin: 10px;
-            transition: transform 0.2s;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 200px;
+            margin: 5px;
         }
-        
         button:hover {
-            transform: translateY(-2px);
+            background: #0056b3;
         }
-        
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
         .result {
-            margin-top: 20px;
+            background: #f8f9fa;
             padding: 15px;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            margin-top: 10px;
             white-space: pre-wrap;
             font-family: monospace;
             font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎰 Slot Machine</h1>
-        
-        <div class="coins">
-            💰 Монеты: <span id="coins">1000</span>
-        </div>
-        
-        <div class="slot-machine">
-            <div class="reels">
-                <div class="reel" id="reel1">🍎</div>
-                <div class="reel" id="reel2">🍊</div>
-                <div class="reel" id="reel3">🍇</div>
-            </div>
-        </div>
-        
-        <button onclick="spin()" id="spinBtn">🎰 Крутить</button>
-        <button onclick="claimBonus()" id="claimBtn">🎁 Забрать бонус</button>
-        
-        <div id="result" class="result" style="display: none;"></div>
+    <h1>🧪 Тест CORS и Fetch для Worker</h1>
+    
+    <div class="test-section">
+        <h2>1. Health Check</h2>
+        <button onclick="testHealth()">🏥 Проверить Worker</button>
+        <div id="health-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. CORS Preflight</h2>
+        <button onclick="testCors()">🌐 Тест CORS</button>
+        <div id="cors-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Fetch POST запрос</h2>
+        <button onclick="testFetch()">📤 Тест Fetch</button>
+        <div id="fetch-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Полный тест Mini App</h2>
+        <button onclick="testMiniApp()">🎮 Тест Mini App данных</button>
+        <div id="miniapp-result" class="result"></div>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        let coins = 1000;
-        let lastResult = null;
+        const WORKER_URL = 'https://slavka-bot-webhook.minuales.workers.dev/';
         
-        // Инициализация Telegram Mini App
-        tg.ready();
-        tg.expand();
-        
-        // Символы для слот-машины
-        const symbols = ['🍎', '🍊', '🍇', '🍒', '🍋', '💎', '7️⃣', '🎰'];
-        
-        function updateCoins() {
-            document.getElementById('coins').textContent = coins;
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${isError ? 'error' : 'success'}`;
         }
         
-        function spin() {
-            const spinBtn = document.getElementById('spinBtn');
-            spinBtn.disabled = true;
-            spinBtn.textContent = '🔄 Крутится...';
-            
-            // Анимация вращения
-            const reels = [
-                document.getElementById('reel1'),
-                document.getElementById('reel2'),
-                document.getElementById('reel3')
-            ];
-            
-            let spins = 0;
-            const maxSpins = 20;
-            
-            const spinInterval = setInterval(() => {
-                reels.forEach(reel => {
-                    reel.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        async function testHealth() {
+            try {
+                const response = await fetch(WORKER_URL);
+                const data = await response.json();
+                showResult('health-result', `✅ Health Check успешен!\nСтатус: ${response.status}\nДанные: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                showResult('health-result', `❌ Ошибка Health Check: ${error.message}`, true);
+            }
+        }
+        
+        async function testCors() {
+            try {
+                const response = await fetch(WORKER_URL, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': 'https://48392.github.io',
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
                 });
                 
-                spins++;
-                if (spins >= maxSpins) {
-                    clearInterval(spinInterval);
-                    
-                    // Финальный результат
-                    const result = [
-                        symbols[Math.floor(Math.random() * symbols.length)],
-                        symbols[Math.floor(Math.random() * symbols.length)],
-                        symbols[Math.floor(Math.random() * symbols.length)]
-                    ];
-                    
-                    reels.forEach((reel, index) => {
-                        reel.textContent = result[index];
-                    });
-                    
-                    // Проверяем выигрыш
-                    if (result[0] === result[1] && result[1] === result[2]) {
-                        const winAmount = 500;
-                        coins += winAmount;
-                        lastResult = `🎉 ДЖЕКПОТ! Выигрыш: ${winAmount} монет!`;
-                        showResult(`🎉 ДЖЕКПОТ! Выигрыш: ${winAmount} монет!\nСимволы: ${result.join(' ')}`);
-                    } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
-                        const winAmount = 100;
-                        coins += winAmount;
-                        lastResult = `🎊 Выигрыш: ${winAmount} монет!`;
-                        showResult(`🎊 Выигрыш: ${winAmount} монет!\nСимволы: ${result.join(' ')}`);
-                    } else {
-                        coins -= 50;
-                        lastResult = `😔 Проигрыш: -50 монет`;
-                        showResult(`😔 Проигрыш: -50 монет\nСимволы: ${result.join(' ')}`);
-                    }
-                    
-                    updateCoins();
-                    spinBtn.disabled = false;
-                    spinBtn.textContent = '🎰 Крутить';
-                }
-            }, 100);
-        }
-        
-        async function claimBonus() {
-            const claimBtn = document.getElementById('claimBtn');
-            claimBtn.disabled = true;
-            claimBtn.textContent = '🔄 Отправляем...';
-            
-            try {
-                // Получаем данные пользователя из Telegram
-                const user = tg.initDataUnsafe?.user;
-                const userId = user?.id || 7167238342; // Fallback ID
-                
-                // Данные для отправки в Worker
-                const data = {
-                    user_id: userId,
-                    miniapp: 'slot_machine_webapp',
-                    event: 'claim_bonus',
-                    coins: coins,
-                    last_result: lastResult,
-                    timestamp: new Date().toISOString(),
-                    source: 'telegram_miniapp',
-                    user_info: {
-                        id: user?.id,
-                        first_name: user?.first_name,
-                        last_name: user?.last_name,
-                        username: user?.username
-                    }
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
                 };
                 
-                console.log('📤 Отправляем данные в Worker:', data);
+                showResult('cors-result', `✅ CORS Preflight успешен!\nСтатус: ${response.status}\nЗаголовки: ${JSON.stringify(corsHeaders, null, 2)}`);
+            } catch (error) {
+                showResult('cors-result', `❌ Ошибка CORS: ${error.message}`, true);
+            }
+        }
+        
+        async function testFetch() {
+            try {
+                const testData = {
+                    user_id: 7167238342,
+                    miniapp: 'test_cors',
+                    event: 'test_fetch',
+                    coins: 1000,
+                    timestamp: new Date().toISOString()
+                };
                 
-                // Отправляем fetch запрос в Worker
-                const response = await fetch('https://slavka-bot-webhook.minuales.workers.dev/', {
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(testData)
                 });
                 
                 const result = await response.json();
-                console.log('📥 Ответ от Worker:', result);
                 
                 if (response.ok) {
-                    showResult(`✅ Бонус успешно отправлен!
-
-📤 Данные:
-${JSON.stringify(data, null, 2)}
-
-📥 Ответ:
-${JSON.stringify(result, null, 2)}
-
-🎉 Проверьте Telegram - должно прийти сообщение!`);
-                    
-                    // Закрываем Mini App
-                    setTimeout(() => {
-                        tg.close();
-                    }, 3000);
+                    showResult('fetch-result', `✅ Fetch запрос успешен!\nСтатус: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`);
                 } else {
-                    throw new Error(`Worker ошибка: ${result.error || 'Неизвестная ошибка'}`);
+                    showResult('fetch-result', `❌ Fetch ошибка: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`, true);
                 }
-                
             } catch (error) {
-                console.error('❌ Ошибка:', error);
-                showResult(`❌ Ошибка отправки: ${error.message}`);
-                claimBtn.disabled = false;
-                claimBtn.textContent = '🎁 Забрать бонус';
+                showResult('fetch-result', `❌ Ошибка Fetch: ${error.message}`, true);
             }
         }
         
-        function showResult(message) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.style.display = 'block';
-            resultDiv.textContent = message;
+        async function testMiniApp() {
+            try {
+                const miniappData = {
+                    user_id: 7167238342,
+                    miniapp: 'slot_machine_webapp',
+                    event: 'claim_bonus',
+                    coins: 1500,
+                    last_result: '🎉 ДЖЕКПОТ! Выигрыш: 500 монет!',
+                    timestamp: new Date().toISOString(),
+                    source: 'telegram_miniapp',
+                    user_info: {
+                        id: 7167238342,
+                        first_name: 'Test',
+                        last_name: 'User',
+                        username: 'testuser'
+                    }
+                };
+                
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(miniappData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult('miniapp-result', `✅ Mini App тест успешен!\nСтатус: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`);
+                } else {
+                    showResult('miniapp-result', `❌ Mini App ошибка: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`, true);
+                }
+            } catch (error) {
+                showResult('miniapp-result', `❌ Ошибка Mini App: ${error.message}`, true);
+            }
         }
         
-        // Обработка touch событий для мобильных устройств
-        document.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-        }, { passive: false });
-        
-        // Логирование для отладки
-        console.log('🎮 Mini App загружен');
-        console.log('👤 Telegram пользователь:', tg.initDataUnsafe?.user);
-        console.log('🔗 Worker URL: https://slavka-bot-webhook.minuales.workers.dev/');
+        // Автоматический тест при загрузке
+        window.onload = function() {
+            console.log('🧪 Начинаем автоматическое тестирование...');
+            setTimeout(testHealth, 1000);
+            setTimeout(testCors, 2000);
+            setTimeout(testFetch, 3000);
+            setTimeout(testMiniApp, 4000);
+        };
     </script>
 </body>
 </html> 
