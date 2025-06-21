@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест исправленного Worker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Тест исправленного Worker</h1>
+        <p>Этот тест проверит, что Worker правильно отправляет данные в бота вместо тестового сообщения.</p>
+        
+        <button onclick="testWorker()">🎯 Тестировать Worker</button>
+        <button onclick="clearResults()">🗑️ Очистить результаты</button>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        async function testWorker() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = '🔄 Отправляем запрос...';
+            
+            try {
+                const testData = {
+                    user_id: 7167238342, // Ваш ID
+                    miniapp: 'first',
+                    event: 'miniapp_closed'
+                };
+                
+                console.log('Отправляем данные:', testData);
+                
+                const response = await fetch('https://slavka-bot-webhook.minuales.workers.dev/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                console.log('Ответ от Worker:', result);
+                
+                resultDiv.textContent = `✅ Запрос выполнен успешно!
+                
+📤 Отправленные данные:
+${JSON.stringify(testData, null, 2)}
+
+📥 Ответ от Worker:
+${JSON.stringify(result, null, 2)}
+
+🔍 Проверьте Telegram - должно прийти сообщение с данными для продолжения цепочки, а не тестовое сообщение!`;
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                resultDiv.textContent = `❌ Ошибка: ${error.message}`;
+            }
+        }
+        
+        function clearResults() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'none';
+        }
+    </script>
+</body>
+</html> 
