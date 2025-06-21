@@ -1,217 +1,306 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мини-апп Бонус</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Слот-машина</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body {
+background: #111;
+color: #fff;
+font-family: sans-serif;
+text-align: center;
+padding-top: 80px;
+margin: 0;
+}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
+#tries {
+font-size: 24px;
+margin-bottom: 20px;
+}
 
-        .container {
-            text-align: center;
-            padding: 20px;
-            max-width: 400px;
-            width: 100%;
-        }
+.reels {
+display: flex;
+justify-content: center;
+gap: 20px;
+margin-bottom: 30px;
+perspective: 1000px;
+transform-style: preserve-3d;
+}
 
-        .game-area {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+.reel {
+width: 70px;
+height: 70px;
+background: linear-gradient(to bottom, #222 0%, #333 50%, #222 100%);
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 32px;
+box-shadow: 0 0 10px #000 inset;
+transform-style: preserve-3d;
+transform: rotateX(10deg);
+position: relative;
+overflow: hidden;
+}
 
-        .attempts {
-            font-size: 18px;
-            margin-bottom: 20px;
-            color: #ffd700;
-            font-weight: bold;
-        }
+.reel::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: linear-gradient(to bottom,
+rgba(255,255,255,0.1) 0%,
+rgba(255,255,255,0) 50%,
+rgba(255,255,255,0.1) 100%
+);
+pointer-events: none;
+}
 
-        .slots {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 30px 0;
-        }
+#play-btn {
+background: linear-gradient(135deg, #ff0055, #ff9900);
+color: #fff;
+padding: 15px 30px;
+border-radius: 12px;
+border: none;
+cursor: pointer;
+font-size: 18px;
+transition: all 0.3s ease;
+text-transform: uppercase;
+letter-spacing: 1px;
+box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3);
+}
 
-        .slot {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
+#play-btn:hover {
+transform: scale(1.05) translateY(-2px);
+box-shadow: 0 6px 20px rgba(255, 0, 85, 0.4);
+}
 
-        .claim-button {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            margin-top: 20px;
-        }
+#play-btn:active {
+transform: scale(0.95) translateY(1px);
+}
 
-        .claim-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
+#bonus-text {
+font-size: 22px;
+margin-top: 30px;
+color: #00ff88;
+display: none;
+text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+animation: glow 1s infinite alternate;
+}
 
-        .claim-button:active {
-            transform: translateY(0);
-        }
+@keyframes glow {
+from {
+text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+to {
+text-shadow: 0 0 20px rgba(0, 255, 136, 0.8),
+0 0 30px rgba(0, 255, 136, 0.6);
+}
+}
 
-        .claim-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .bonus-message {
-            background: linear-gradient(45deg, #00b894, #00a085);
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .loading {
-            display: none;
-            margin-top: 10px;
-        }
-
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .close-button {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 20px;
-            border-radius: 15px;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .close-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-    </style>
+#confetti-canvas {
+position: fixed;
+top: 0; left: 0;
+width: 100%;
+height: 100%;
+pointer-events: none;
+z-index: 999;
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="game-area">
-            <div class="attempts">Осталось попыток: 3</div>
-            
-            <div class="slots">
-                <div class="slot">🍒</div>
-                <div class="slot">🍊</div>
-                <div class="slot">🔔</div>
-            </div>
-            
-            <button class="claim-button" id="claimButton">Забрать бонус</button>
-            
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Обрабатываем запрос...</p>
-            </div>
-            
-            <div class="bonus-message" id="bonusMessage" style="display: none;">
-                Ура, +70 FREESPINS для Вас! 🎉
-            </div>
-            
-            <button class="close-button" id="closeButton" style="display: none;">Закрыть</button>
-        </div>
-    </div>
+<div id="tries">Осталось попыток: 3</div>
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+<div class="reels">
+<div class="reel" id="r1">🍒</div>
+<div class="reel" id="r2">🍊</div>
+<div class="reel" id="r3">🔔</div>
+</div>
 
-        const claimButton = document.getElementById('claimButton');
-        const loading = document.getElementById('loading');
+<button id="play-btn">ИГРАТЬ</button>
+<div id="bonus-text">Ура, +70 FREESPINS для Вас! 🎉</div>
+<canvas id="confetti-canvas"></canvas>
 
-        // Получаем данные пользователя
-        const user = tg.initDataUnsafe?.user;
-        const userId = user?.id;
+<script>
+const symbols = ['🍒', '🍊', '🔔', '🍋', '⭐', '🍇'];
+let triesLeft = 3;
+let spinning = false;
+let hasWon = false;
 
-        // Обработчик нажатия кнопки "Забрать бонус"
-        claimButton.onclick = async () => {
-            console.log('Кнопка "Забрать бонус" нажата');
-            
-            // Показываем загрузку
-            claimButton.disabled = true;
-            loading.style.display = 'block';
-            
-            try {
-                // Отправляем данные в бота через tg.sendData()
-                const dataToSend = {
-                    type: 'button_click',
-                    button_id: 'claim_bonus',
-                    user_id: userId,
-                    miniapp: 'miniapp_bonus.html'
-                };
-                
-                tg.sendData(JSON.stringify(dataToSend));
-                
-                // Закрываем mini app
-                tg.close();
-                
-            } catch (error) {
-                console.error('Ошибка:', error);
-                
-                // Показываем ошибку
-                const bonusMessage = document.getElementById('bonusMessage');
-                bonusMessage.textContent = '❌ Ошибка при зачислении бонуса';
-                bonusMessage.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
-                bonusMessage.style.display = 'block';
-                
-                // Скрываем загрузку
-                loading.style.display = 'none';
-                claimButton.disabled = false;
-            }
-        };
-    </script>
+const r1 = document.getElementById('r1');
+const r2 = document.getElementById('r2');
+const r3 = document.getElementById('r3');
+const btn = document.getElementById('play-btn');
+const tries = document.getElementById('tries');
+const bonusText = document.getElementById('bonus-text');
+
+function getRandomSymbol() {
+return symbols[Math.floor(Math.random() * symbols.length)];
+}
+
+function spinReel(reelEl, finalSymbol, delay) {
+return new Promise(resolve => {
+let count = 0;
+const interval = setInterval(() => {
+reelEl.textContent = getRandomSymbol();
+reelEl.style.transform = `rotateX(10deg) scale(${1 + Math.random() * 0.1})`;
+
+if (++count > 15) {
+clearInterval(interval);
+setTimeout(() => {
+reelEl.textContent = finalSymbol;
+reelEl.style.transform = 'rotateX(10deg) scale(1)';
+resolve();
+}, delay);
+}
+}, 50);
+});
+}
+
+function playWinEffects() {
+bonusText.style.display = 'block';
+startConfetti();
+
+// Анимация выигрышных барабанов
+[r1, r2, r3].forEach(reel => {
+reel.style.animation = 'winPulse 0.5s ease-in-out 3';
+});
+
+btn.textContent = 'Забрать бонус';
+btn.style.background = 'linear-gradient(135deg, #00ff88, #00ccff)';
+btn.style.fontSize = '20px';
+btn.onclick = async () => {
+await sendMiniappData('miniapp_closed');
+window.Telegram.WebApp.close();
+};
+}
+
+async function sendMiniappData(event) {
+const tg = window.Telegram.WebApp;
+const userId = tg.initDataUnsafe?.user?.id;
+
+if (!userId) {
+console.error('Ошибка: не удалось получить user_id');
+return;
+}
+
+try {
+                const response = await fetch('https://test-bot-worker.minuales.workers.dev/', {
+                const response = await fetch('https://slavka-bot-webhook.minuales.workers.dev/', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ 
+user_id: userId,
+miniapp: 'first',
+event: event
+})
+});
+
+const result = await response.json();
+console.log('Ответ сервера:', result);
+
+} catch (err) {
+console.error('Ошибка при отправке:', err.message);
+}
+}
+
+btn.addEventListener('click', async () => {
+if (spinning || triesLeft <= 0) return;
+
+spinning = true;
+triesLeft--;
+tries.textContent = 'Осталось попыток: ' + triesLeft;
+
+let sym1, sym2, sym3;
+
+if (triesLeft === 0) {
+// Гарантированный выигрыш на последней попытке
+const winSymbol = getRandomSymbol();
+sym1 = sym2 = sym3 = winSymbol;
+hasWon = true;
+} else {
+// Случайные символы, но избегаем 3 одинаковых до последней попытки
+sym1 = getRandomSymbol();
+sym2 = getRandomSymbol();
+sym3 = getRandomSymbol();
+
+// Если выпали 3 одинаковых и это не последняя попытка, меняем один символ
+if (sym1 === sym2 && sym2 === sym3 && triesLeft > 0) {
+sym3 = symbols[(symbols.indexOf(sym3) + 1) % symbols.length];
+}
+}
+
+await Promise.all([
+spinReel(r1, sym1, 100),
+spinReel(r2, sym2, 200),
+spinReel(r3, sym3, 300),
+]);
+
+if (sym1 === sym2 && sym2 === sym3) {
+playWinEffects();
+}
+
+spinning = false;
+});
+
+// --- Конфетти ---
+const canvas = document.getElementById('confetti-canvas');
+const ctx = canvas.getContext('2d');
+let confetti = [];
+
+function resizeCanvas() {
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function startConfetti() {
+confetti = Array.from({ length: 200 }, () => ({
+x: Math.random() * canvas.width,
+y: Math.random() * canvas.height - canvas.height,
+size: Math.random() * 6 + 2,
+speed: Math.random() * 3 + 2,
+color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+}));
+
+requestAnimationFrame(updateConfetti);
+}
+
+function updateConfetti() {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+confetti.forEach(p => {
+p.y += p.speed;
+if (p.y > canvas.height) p.y = -10;
+ctx.fillStyle = p.color;
+ctx.beginPath();
+ctx.arc(p.x, p.y, p.size, 0, 2 * Math.PI);
+ctx.fill();
+});
+requestAnimationFrame(updateConfetti);
+}
+
+// Добавляем стили для анимации выигрыша
+const style = document.createElement('style');
+style.textContent = `
+           @keyframes winPulse {
+               0% { transform: rotateX(10deg) scale(1); }
+               50% { transform: rotateX(10deg) scale(1.2); }
+               100% { transform: rotateX(10deg) scale(1); }
+           }
+       `;
+document.head.appendChild(style);
+
+// Отправляем данные при закрытии миниаппа
+window.addEventListener('beforeunload', () => {
+if (!hasWon) {
+sendMiniappData('miniapp_closed');
+}
+});
+</script>
 </body>
-</html> 
