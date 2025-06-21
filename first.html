@@ -172,10 +172,16 @@
       btn.style.background = 'linear-gradient(135deg, #00ff88, #00ccff)';
       btn.style.fontSize = '20px';
       btn.onclick = async () => {
-        Telegram.WebApp.sendData(JSON.stringify({
-          event: 'first_completed'
-        }));
-        Telegram.WebApp.close();
+        console.log('Отправляю событие first_completed...');
+        try {
+          Telegram.WebApp.sendData(JSON.stringify({
+            event: 'first_completed'
+          }));
+          console.log('Событие отправлено успешно');
+          Telegram.WebApp.close();
+        } catch (error) {
+          console.error('Ошибка при отправке события:', error);
+        }
       };
     }
 
