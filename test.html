@@ -152,6 +152,9 @@
             log('📊 Информация о WebApp:', 'info');
             log(`initDataUnsafe: ${JSON.stringify(tg.initDataUnsafe, null, 2)}`, 'debug');
             log(`User ID: ${tg.initDataUnsafe.user?.id}`, 'info');
+            if (!tg.initDataUnsafe.user?.id) {
+                log('❗️ ВНИМАНИЕ: user_id не найден! Миниапп не сможет отправить сообщение через worker.', 'error');
+            }
             log(`First Name: ${tg.initDataUnsafe.user?.first_name}`, 'info');
             log(`Username: ${tg.initDataUnsafe.user?.username}`, 'info');
             log(`Language: ${tg.initDataUnsafe.user?.language_code}`, 'info');
