@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Простой тест</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Fetch Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -54,114 +53,102 @@
             font-size: 12px;
             margin-top: 20px;
         }
+        
+        .success { color: #00ff88; }
+        .error { color: #ff6b6b; }
+        .info { color: #4ecdc4; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Простой тест (точная копия first.html)</h1>
+        <h1>🧪 Простой тест fetch</h1>
         
-        <button onclick="testFetch()">Тест fetch (как в first.html)</button>
-        <button onclick="testWebApp()">Тест WebApp.sendData()</button>
+        <button onclick="testFetch()">Тест fetch на Worker</button>
+        <button onclick="testWebhook()">Тест fetch на webhook.site</button>
         
         <div class="log" id="log">
-            <div>🚀 Готов к тестированию...</div>
+            <div class="info">🚀 Готов к тестированию...</div>
         </div>
     </div>
     
     <script>
-        const tg = window.Telegram.WebApp;
         const logDiv = document.getElementById('log');
         const WORKER_URL = 'https://test-bot-worker.minuales.workers.dev';
+        const WEBHOOK_URL = 'https://webhook.site/47c72989-2f6b-441b-a79d-090155b07d03';
         
-        function log(message) {
+        function log(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
             const logEntry = document.createElement('div');
+            logEntry.className = type;
             logEntry.innerHTML = `[${timestamp}] ${message}`;
             logDiv.appendChild(logEntry);
             logDiv.scrollTop = logDiv.scrollHeight;
-            console.log(message);
+            console.log(`[${type.toUpperCase()}] ${message}`);
         }
         
-        // Инициализация
-        try {
-            tg.ready();
-            tg.expand();
-            log('✅ WebApp инициализирован');
-            log(`User ID: ${tg.initDataUnsafe.user?.id}`);
-        } catch (error) {
-            log(`❌ Ошибка инициализации: ${error.message}`);
-        }
-        
-        // Тест 1: Точная копия first.html
+        // Тест fetch на наш worker
         async function testFetch() {
-            log('=== ТЕСТ FETCH (как в first.html) ===');
-            
-            const userId = tg.initDataUnsafe?.user?.id;
-            log(`User ID: ${userId}`);
-            
-            alert('userId: ' + userId);
-            if (!userId) {
-                log('❌ Ошибка: не удалось получить user_id');
-                alert('Ошибка: не удалось получить user_id');
-                return;
-            }
+            log('=== ТЕСТ FETCH НА WORKER ===', 'info');
             
             try {
-                log('📤 Пробуем отправить fetch...');
-                alert('Пробуем отправить fetch...');
+                log('📤 Отправляем запрос на worker...', 'info');
                 
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId })
+                    body: JSON.stringify({ 
+                        user_id: 7167238342,
+                        test: 'browser_fetch'
+                    })
                 });
                 
-                const result = await response.text();
-                log(`📥 Ответ сервера: ${result}`);
-                alert('Ответ сервера: ' + result);
-                alert('hello');
-                tg.close();
+                log(`📥 Статус ответа: ${response.status}`, 'info');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                log(`📥 Ответ от worker: ${JSON.stringify(result, null, 2)}`, 'success');
                 
             } catch (err) {
-                log(`❌ Ошибка при отправке: ${err.message}`);
-                alert('Ошибка при отправке: ' + err.message);
+                log(`❌ Ошибка fetch: ${err.message}`, 'error');
+                log(`Stack: ${err.stack}`, 'error');
             }
         }
         
-        // Тест 2: WebApp.sendData()
-        function testWebApp() {
-            log('=== ТЕСТ WebApp.sendData() ===');
-            
-            const userId = tg.initDataUnsafe?.user?.id;
-            log(`User ID: ${userId}`);
-            
-            if (!userId) {
-                log('❌ Ошибка: не удалось получить user_id');
-                alert('Ошибка: не удалось получить user_id');
-                return;
-            }
+        // Тест fetch на webhook.site (как в first.html)
+        async function testWebhook() {
+            log('=== ТЕСТ FETCH НА WEBHOOK.SITE ===', 'info');
             
             try {
-                const data = {
-                    event: 'test_button_clicked',
-                    user_id: userId,
-                    test: 'webapp_senddata'
-                };
+                log('📤 Отправляем запрос на webhook.site...', 'info');
                 
-                log(`📤 Отправляем через WebApp.sendData(): ${JSON.stringify(data)}`);
-                alert('Отправляем через WebApp.sendData()...');
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        user_id: 7167238342,
+                        test: 'browser_webhook'
+                    })
+                });
                 
-                tg.sendData(JSON.stringify(data));
-                log('✅ WebApp.sendData() выполнен');
-                alert('WebApp.sendData() выполнен!');
+                log(`📥 Статус ответа: ${response.status}`, 'info');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.text();
+                log(`📥 Ответ от webhook: ${result}`, 'success');
                 
             } catch (err) {
-                log(`❌ Ошибка WebApp.sendData(): ${err.message}`);
-                alert('Ошибка WebApp.sendData(): ' + err.message);
+                log(`❌ Ошибка fetch: ${err.message}`, 'error');
+                log(`Stack: ${err.stack}`, 'error');
             }
         }
         
-        log('🎯 Готов к работе!');
+        log('🎯 Готов к работе!', 'info');
     </script>
 </body>
 </html> 
