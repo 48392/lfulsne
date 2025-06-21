@@ -98,12 +98,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Тестовый миниапп</h1>
+        <h1>🎮 Тестовый миниапп (Рабочий подход)</h1>
         
         <div class="button-group">
-            <button id="btn1">Подход 1: WebApp.sendData()</button>
-            <button id="btn2">Подход 2: Fetch на Worker</button>
-            <button id="btn3">Подход 3: Telegram.WebApp.sendData() + Fetch</button>
+            <button id="btn1">Тест 1: Простой fetch на Worker</button>
+            <button id="btn2">Тест 2: WebApp.sendData()</button>
+            <button id="btn3">Тест 3: Комбинированный</button>
         </div>
         
         <div class="log-container" id="logContainer">
@@ -115,9 +115,6 @@
         const tg = window.Telegram.WebApp;
         const logContainer = document.getElementById('logContainer');
         
-        // Глобальные переменные для логирования
-        let requestId = 0;
-        
         // URL Worker'а
         const WORKER_URL = 'https://test-bot-worker.minuales.workers.dev';
         
@@ -126,7 +123,6 @@
             const logEntry = document.createElement('div');
             logEntry.className = `log-entry log-${type}`;
             
-            // Добавляем статус индикатор для важных событий
             let statusIcon = '';
             if (type === 'success') statusIcon = '<span class="status-indicator status-online"></span>';
             else if (type === 'error') statusIcon = '<span class="status-indicator status-offline"></span>';
@@ -150,11 +146,7 @@
         // Логируем информацию о пользователе
         try {
             log('📊 Информация о WebApp:', 'info');
-            log(`initDataUnsafe: ${JSON.stringify(tg.initDataUnsafe, null, 2)}`, 'debug');
             log(`User ID: ${tg.initDataUnsafe.user?.id}`, 'info');
-            if (!tg.initDataUnsafe.user?.id) {
-                log('❗️ ВНИМАНИЕ: user_id не найден! Миниапп не сможет отправить сообщение через worker.', 'error');
-            }
             log(`First Name: ${tg.initDataUnsafe.user?.first_name}`, 'info');
             log(`Username: ${tg.initDataUnsafe.user?.username}`, 'info');
             log(`Language: ${tg.initDataUnsafe.user?.language_code}`, 'info');
@@ -164,174 +156,123 @@
             log(`❌ Ошибка получения информации о пользователе: ${error.message}`, 'error');
         }
         
-        // Подход 1: WebApp.sendData() - отправляет данные в бота
+        // Тест 1: Простой fetch на Worker (как в first.html)
         document.getElementById('btn1').addEventListener('click', async () => {
-            const currentRequestId = ++requestId;
-            log(`=== ПОДХОД 1: WebApp.sendData() [ID: ${currentRequestId}] ===`, 'info');
+            log('=== ТЕСТ 1: Простой fetch на Worker ===', 'info');
             
-            try {
-                const data = {
-                    event: 'button1_clicked',
-                    user_id: tg.initDataUnsafe.user?.id,
-                    timestamp: new Date().toISOString(),
-                    request_id: currentRequestId,
-                    approach: 'webapp'
-                };
-                
-                log(`📤 Отправляем данные через WebApp.sendData(): ${JSON.stringify(data, null, 2)}`, 'info');
-                
-                tg.sendData(JSON.stringify(data));
-                log('✅ Данные отправлены через WebApp.sendData()', 'success');
-                
-            } catch (error) {
-                log(`❌ Ошибка в подходе 1: ${error.message}`, 'error');
-                log(`Stack trace: ${error.stack}`, 'error');
+            const userId = tg.initDataUnsafe?.user?.id;
+            log(`User ID: ${userId}`, 'info');
+            
+            if (!userId) {
+                log('❌ Ошибка: не удалось получить user_id', 'error');
+                alert('Ошибка: не удалось получить user_id');
+                return;
             }
-        });
-        
-        // Подход 2: Fetch на Worker - прямой запрос к worker
-        document.getElementById('btn2').addEventListener('click', async () => {
-            const currentRequestId = ++requestId;
-            log(`=== ПОДХОД 2: Fetch на Worker [ID: ${currentRequestId}] ===`, 'info');
             
             try {
-                const data = {
-                    user_id: tg.initDataUnsafe.user?.id,
-                    command: 'send_message',
-                    approach: 'direct_fetch',
-                    timestamp: new Date().toISOString(),
-                    request_id: currentRequestId
-                };
+                log('📤 Пробуем отправить fetch...', 'info');
+                alert('Пробуем отправить fetch...');
                 
-                log(`📤 Отправляем POST запрос на worker: ${JSON.stringify(data, null, 2)}`, 'info');
-                log(`🌐 Worker URL: ${WORKER_URL}`, 'info');
-                
-                const startTime = Date.now();
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        user_id: userId,
+                        command: 'send_message',
+                        test: 'simple_fetch'
+                    })
                 });
-                const endTime = Date.now();
                 
-                log(`⏱️ Время запроса: ${endTime - startTime}ms`, 'info');
-                log(`📥 Статус ответа: ${response.status} ${response.statusText}`, 'info');
-                log(`📥 Headers ответа: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`, 'debug');
+                const result = await response.text();
+                log(`📥 Ответ сервера: ${result}`, 'success');
+                alert('Ответ сервера: ' + result);
+                alert('Тест 1 завершен!');
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const result = await response.json();
-                log(`📥 Ответ от worker: ${JSON.stringify(result, null, 2)}`, 'success');
-                
-                if (result.error) {
-                    log(`⚠️ Worker вернул ошибку: ${result.error}`, 'warning');
-                }
-                
-            } catch (error) {
-                log(`❌ Ошибка в подходе 2: ${error.message}`, 'error');
-                log(`Stack trace: ${error.stack}`, 'error');
+            } catch (err) {
+                log(`❌ Ошибка при отправке: ${err.message}`, 'error');
+                alert('Ошибка при отправке: ' + err.message);
             }
         });
         
-        // Подход 3: Комбинированный - WebApp.sendData() + Fetch
-        document.getElementById('btn3').addEventListener('click', async () => {
-            const currentRequestId = ++requestId;
-            log(`=== ПОДХОД 3: WebApp.sendData() + Fetch [ID: ${currentRequestId}] ===`, 'info');
+        // Тест 2: WebApp.sendData()
+        document.getElementById('btn2').addEventListener('click', async () => {
+            log('=== ТЕСТ 2: WebApp.sendData() ===', 'info');
+            
+            const userId = tg.initDataUnsafe?.user?.id;
+            log(`User ID: ${userId}`, 'info');
+            
+            if (!userId) {
+                log('❌ Ошибка: не удалось получить user_id', 'error');
+                alert('Ошибка: не удалось получить user_id');
+                return;
+            }
             
             try {
-                // Сначала отправляем через WebApp.sendData()
-                const webappData = {
-                    event: 'button3_clicked',
-                    user_id: tg.initDataUnsafe.user?.id,
-                    approach: 'combined',
-                    timestamp: new Date().toISOString(),
-                    request_id: currentRequestId
+                const data = {
+                    event: 'test_button_clicked',
+                    user_id: userId,
+                    test: 'webapp_senddata'
                 };
                 
-                log(`📤 Отправляем через WebApp.sendData(): ${JSON.stringify(webappData, null, 2)}`, 'info');
+                log(`📤 Отправляем через WebApp.sendData(): ${JSON.stringify(data)}`, 'info');
+                alert('Отправляем через WebApp.sendData()...');
+                
+                tg.sendData(JSON.stringify(data));
+                log('✅ WebApp.sendData() выполнен', 'success');
+                alert('WebApp.sendData() выполнен!');
+                
+            } catch (err) {
+                log(`❌ Ошибка WebApp.sendData(): ${err.message}`, 'error');
+                alert('Ошибка WebApp.sendData(): ' + err.message);
+            }
+        });
+        
+        // Тест 3: Комбинированный
+        document.getElementById('btn3').addEventListener('click', async () => {
+            log('=== ТЕСТ 3: Комбинированный ===', 'info');
+            
+            const userId = tg.initDataUnsafe?.user?.id;
+            log(`User ID: ${userId}`, 'info');
+            
+            if (!userId) {
+                log('❌ Ошибка: не удалось получить user_id', 'error');
+                alert('Ошибка: не удалось получить user_id');
+                return;
+            }
+            
+            try {
+                // Сначала WebApp.sendData()
+                const webappData = {
+                    event: 'combined_test',
+                    user_id: userId,
+                    test: 'combined_webapp'
+                };
+                
+                log(`📤 WebApp.sendData(): ${JSON.stringify(webappData)}`, 'info');
                 tg.sendData(JSON.stringify(webappData));
                 log('✅ WebApp.sendData() выполнен', 'success');
                 
-                // Затем делаем fetch на worker
-                const fetchData = {
-                    user_id: tg.initDataUnsafe.user?.id,
-                    command: 'send_message',
-                    approach: 'combined',
-                    timestamp: new Date().toISOString(),
-                    request_id: currentRequestId
-                };
-                
-                log(`📤 Отправляем fetch на worker: ${JSON.stringify(fetchData, null, 2)}`, 'info');
-                log(`🌐 Worker URL: ${WORKER_URL}`, 'info');
-                
-                const startTime = Date.now();
+                // Затем fetch
+                log('📤 Отправляем fetch...', 'info');
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(fetchData)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        user_id: userId,
+                        command: 'send_message',
+                        test: 'combined_fetch'
+                    })
                 });
-                const endTime = Date.now();
                 
-                log(`⏱️ Время запроса: ${endTime - startTime}ms`, 'info');
-                log(`📥 Статус ответа: ${response.status} ${response.statusText}`, 'info');
+                const result = await response.text();
+                log(`📥 Ответ сервера: ${result}`, 'success');
+                alert('Комбинированный тест завершен! Ответ: ' + result);
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const result = await response.json();
-                log(`📥 Ответ от worker: ${JSON.stringify(result, null, 2)}`, 'success');
-                
-                if (result.error) {
-                    log(`⚠️ Worker вернул ошибку: ${result.error}`, 'warning');
-                }
-                
-            } catch (error) {
-                log(`❌ Ошибка в подходе 3: ${error.message}`, 'error');
-                log(`Stack trace: ${error.stack}`, 'error');
+            } catch (err) {
+                log(`❌ Ошибка в комбинированном тесте: ${err.message}`, 'error');
+                alert('Ошибка в комбинированном тесте: ' + err.message);
             }
         });
-        
-        // Логируем события WebApp
-        try {
-            tg.onEvent('viewportChanged', () => {
-                log('🔄 WebApp: viewportChanged', 'warning');
-            });
-            
-            tg.onEvent('themeChanged', () => {
-                log('🎨 WebApp: themeChanged', 'warning');
-            });
-            
-            tg.onEvent('mainButtonClicked', () => {
-                log('🔘 WebApp: mainButtonClicked', 'warning');
-            });
-            
-            tg.onEvent('backButtonClicked', () => {
-                log('⬅️ WebApp: backButtonClicked', 'warning');
-            });
-            
-            tg.onEvent('settingsButtonClicked', () => {
-                log('⚙️ WebApp: settingsButtonClicked', 'warning');
-            });
-            
-            log('✅ Все обработчики событий WebApp установлены', 'success');
-        } catch (error) {
-            log(`❌ Ошибка установки обработчиков событий: ${error.message}`, 'error');
-        }
-        
-        // Логируем информацию о доступных методах
-        log('🔧 Доступные методы WebApp:', 'debug');
-        log(`- tg.ready(): ${typeof tg.ready}`, 'debug');
-        log(`- tg.expand(): ${typeof tg.expand}`, 'debug');
-        log(`- tg.sendData(): ${typeof tg.sendData}`, 'debug');
-        log(`- tg.onEvent(): ${typeof tg.onEvent}`, 'debug');
-        log(`- tg.initDataUnsafe: ${typeof tg.initDataUnsafe}`, 'debug');
         
         log('🎯 Миниапп готов к работе!', 'success');
     </script>
