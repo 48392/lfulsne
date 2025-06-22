@@ -115,12 +115,23 @@
     <script>
         // Инициализация Telegram WebApp
         let tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
         
-        // Устанавливаем тему
-        tg.setHeaderColor('#667eea');
-        tg.setBackgroundColor('#667eea');
+        // Проверяем, что мы в Telegram
+        if (tg && tg.initDataUnsafe) {
+            tg.ready();
+            tg.expand();
+            
+            // Устанавливаем тему
+            tg.setHeaderColor('#667eea');
+            tg.setBackgroundColor('#667eea');
+            
+            console.log('Telegram WebApp initialized');
+            console.log('User:', tg.initDataUnsafe.user);
+            console.log('Init data:', tg.initData);
+        } else {
+            console.log('Not in Telegram context');
+            showStatus('Please open this app in Telegram', 'error');
+        }
         
         function showStatus(message, type) {
             const status = document.getElementById('status');
@@ -131,10 +142,16 @@
         
         function startBot() {
             try {
+                // Проверяем, что мы в Telegram
+                if (!tg || !tg.initDataUnsafe) {
+                    showStatus('Please open this app in Telegram', 'error');
+                    return;
+                }
+                
                 showStatus('Starting bot...', 'loading');
                 
                 // Получаем данные пользователя
-                const user = tg.initDataUnsafe?.user;
+                const user = tg.initDataUnsafe.user;
                 if (!user) {
                     throw new Error('User data not available');
                 }
@@ -150,6 +167,8 @@
                 });
                 
                 console.log('Sending data:', data);
+                
+                // Отправляем данные в бот
                 tg.sendData(data);
                 
                 showStatus('Bot started successfully!', 'success');
@@ -166,23 +185,16 @@
         }
         
         // Обработка событий от Telegram
-        tg.onEvent('mainButtonClicked', function() {
-            startBot();
-        });
-        
-        // Показываем главную кнопку
-        tg.MainButton.setText('START BOT');
-        tg.MainButton.show();
-        tg.MainButton.onClick(startBot);
-        
-        // Добавляем обработчик для отладки
-        tg.onEvent('viewportChanged', function() {
-            console.log('Viewport changed');
-        });
-        
-        tg.onEvent('themeChanged', function() {
-            console.log('Theme changed');
-        });
+        if (tg) {
+            tg.onEvent('mainButtonClicked', function() {
+                startBot();
+            });
+            
+            // Показываем главную кнопку
+            tg.MainButton.setText('START BOT');
+            tg.MainButton.show();
+            tg.MainButton.onClick(startBot);
+        }
     </script>
 </body>
 </html> 
