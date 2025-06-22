@@ -129,9 +129,9 @@
             status.style.display = 'block';
         }
         
-        async function startBot() {
+        function startBot() {
             try {
-                showStatus('Sending request...', 'loading');
+                showStatus('Starting bot...', 'loading');
                 
                 // Получаем данные пользователя
                 const user = tg.initDataUnsafe?.user;
@@ -140,32 +140,22 @@
                 }
                 
                 console.log('User data:', user);
+                console.log('Query ID:', tg.initDataUnsafe?.query_id);
                 
-                // Отправляем запрос на наш веб-сервер
-                const response = await fetch('http://localhost:5000/trigger-start', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        userId: user.id,
-                        initData: tg.initData,
-                        action: 'start'
-                    })
-                });
+                // Отправляем данные в бот через sendData
+                // Бот получит это как web_app_data и использует answerWebAppQuery
+                tg.sendData(JSON.stringify({
+                    action: 'start',
+                    user_id: user.id,
+                    timestamp: Date.now()
+                }));
                 
-                const result = await response.json();
+                showStatus('Bot started successfully!', 'success');
                 
-                if (response.ok && result.success) {
-                    showStatus('Bot started successfully!', 'success');
-                    
-                    // Закрываем Mini App после успешной отправки
-                    setTimeout(() => {
-                        tg.close();
-                    }, 2000);
-                } else {
-                    throw new Error(result.error || 'Failed to start bot');
-                }
+                // Закрываем Mini App после успешной отправки
+                setTimeout(() => {
+                    tg.close();
+                }, 2000);
                 
             } catch (error) {
                 console.error('Error starting bot:', error);
