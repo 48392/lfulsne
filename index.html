@@ -95,6 +95,12 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        
+        .loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
     </style>
 </head>
 <body>
@@ -123,25 +129,47 @@
             status.style.display = 'block';
         }
         
-        function startBot() {
+        async function startBot() {
             try {
-                // Отправляем данные в бот через Telegram WebApp API
-                tg.sendData(JSON.stringify({
-                    action: 'start',
-                    command: '/start',
-                    timestamp: Date.now()
-                }));
+                showStatus('Sending request...', 'loading');
                 
-                showStatus('Bot started successfully!', 'success');
+                // Получаем данные пользователя
+                const user = tg.initDataUnsafe?.user;
+                if (!user) {
+                    throw new Error('User data not available');
+                }
                 
-                // Закрываем Mini App после успешной отправки
-                setTimeout(() => {
-                    tg.close();
-                }, 2000);
+                console.log('User data:', user);
+                
+                // Отправляем запрос на наш веб-сервер
+                const response = await fetch('http://localhost:5000/trigger-start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        initData: tg.initData,
+                        action: 'start'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showStatus('Bot started successfully!', 'success');
+                    
+                    // Закрываем Mini App после успешной отправки
+                    setTimeout(() => {
+                        tg.close();
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || 'Failed to start bot');
+                }
                 
             } catch (error) {
                 console.error('Error starting bot:', error);
-                showStatus('Error starting bot. Please try again.', 'error');
+                showStatus(`Error: ${error.message}`, 'error');
             }
         }
         
