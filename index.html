@@ -1,117 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Mini App</title>
+    <title>Simple Test</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background: #f0f0f0;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        button {
-            background: #0088cc;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px;
-        }
-        .status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Test Mini App</h1>
-        <p>This is a simple test to check if data sending works.</p>
-        
-        <button onclick="sendTestData()">Send Test Data</button>
-        <button onclick="sendStartData()">Send Start Data</button>
-        
-        <div id="status"></div>
-    </div>
+    <h1>Simple Mini App Test</h1>
+    <button onclick="sendData()">Send Data</button>
+    <div id="status"></div>
 
     <script>
         let tg = window.Telegram.WebApp;
         
-        function showStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = `status ${type}`;
+        function showStatus(message) {
+            document.getElementById('status').textContent = message;
         }
         
-        function sendTestData() {
+        function sendData() {
             try {
                 if (!tg || !tg.initDataUnsafe) {
-                    showStatus('Not in Telegram context', 'error');
+                    showStatus('Not in Telegram context');
                     return;
                 }
                 
                 const data = JSON.stringify({
                     action: 'test',
                     user_id: tg.initDataUnsafe.user?.id,
-                    message: 'Hello from Mini App!',
-                    timestamp: Date.now()
+                    message: 'Hello from Mini App!'
                 });
                 
-                console.log('Sending test data:', data);
+                console.log('Sending data:', data);
                 tg.sendData(data);
-                showStatus('Test data sent!', 'success');
+                showStatus('Data sent successfully!');
                 
             } catch (error) {
-                console.error('Error sending test data:', error);
-                showStatus(`Error: ${error.message}`, 'error');
+                console.error('Error:', error);
+                showStatus('Error: ' + error.message);
             }
         }
         
-        function sendStartData() {
-            try {
-                if (!tg || !tg.initDataUnsafe) {
-                    showStatus('Not in Telegram context', 'error');
-                    return;
-                }
-                
-                const data = JSON.stringify({
-                    action: 'start',
-                    user_id: tg.initDataUnsafe.user?.id,
-                    timestamp: Date.now()
-                });
-                
-                console.log('Sending start data:', data);
-                tg.sendData(data);
-                showStatus('Start data sent!', 'success');
-                
-            } catch (error) {
-                console.error('Error sending start data:', error);
-                showStatus(`Error: ${error.message}`, 'error');
-            }
-        }
-        
-        // Initialize
         if (tg && tg.initDataUnsafe) {
             tg.ready();
             tg.expand();
             console.log('Telegram WebApp initialized');
             console.log('User:', tg.initDataUnsafe.user);
-            showStatus('Ready to send data', 'success');
+            showStatus('Ready to send data');
         } else {
             console.log('Not in Telegram context');
-            showStatus('Please open in Telegram', 'error');
+            showStatus('Please open in Telegram');
         }
     </script>
 </body>
