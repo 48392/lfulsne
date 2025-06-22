@@ -140,15 +140,17 @@
                 }
                 
                 console.log('User data:', user);
-                console.log('Query ID:', tg.initDataUnsafe?.query_id);
+                console.log('Init data:', tg.initData);
                 
                 // Отправляем данные в бот через sendData
-                // Бот получит это как web_app_data и использует answerWebAppQuery
-                tg.sendData(JSON.stringify({
+                const data = JSON.stringify({
                     action: 'start',
                     user_id: user.id,
                     timestamp: Date.now()
-                }));
+                });
+                
+                console.log('Sending data:', data);
+                tg.sendData(data);
                 
                 showStatus('Bot started successfully!', 'success');
                 
@@ -172,6 +174,15 @@
         tg.MainButton.setText('START BOT');
         tg.MainButton.show();
         tg.MainButton.onClick(startBot);
+        
+        // Добавляем обработчик для отладки
+        tg.onEvent('viewportChanged', function() {
+            console.log('Viewport changed');
+        });
+        
+        tg.onEvent('themeChanged', function() {
+            console.log('Theme changed');
+        });
     </script>
 </body>
 </html> 
