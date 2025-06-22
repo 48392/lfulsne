@@ -3,197 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Mini App</title>
+    <title>Test Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
+            font-family: Arial, sans-serif;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #f0f0f0;
         }
-        
         .container {
             background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
-            max-width: 400px;
-            width: 100%;
         }
-        
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 32px;
-            font-weight: bold;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-        
-        p {
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-        
-        .start-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        button {
+            background: #0088cc;
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            margin: 10px;
         }
-        
-        .start-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
-        }
-        
-        .start-button:active {
-            transform: translateY(0);
-        }
-        
         .status {
             margin-top: 20px;
             padding: 10px;
-            border-radius: 10px;
-            font-size: 14px;
-            display: none;
+            border-radius: 5px;
         }
-        
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .loading {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">🚀</div>
-        <h1>Welcome to Trading Bot</h1>
-        <p>Start your trading journey with our advanced bot. Get instant signals and maximize your profits!</p>
-        <button class="start-button" onclick="startBot()">Start Bot</button>
-        <div id="status" class="status"></div>
+        <h1>Test Mini App</h1>
+        <p>This is a simple test to check if data sending works.</p>
+        
+        <button onclick="sendTestData()">Send Test Data</button>
+        <button onclick="sendStartData()">Send Start Data</button>
+        
+        <div id="status"></div>
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
         let tg = window.Telegram.WebApp;
-        
-        // Проверяем, что мы в Telegram
-        if (tg && tg.initDataUnsafe) {
-            tg.ready();
-            tg.expand();
-            
-            // Устанавливаем тему
-            tg.setHeaderColor('#667eea');
-            tg.setBackgroundColor('#667eea');
-            
-            console.log('Telegram WebApp initialized');
-            console.log('User:', tg.initDataUnsafe.user);
-            console.log('Init data:', tg.initData);
-        } else {
-            console.log('Not in Telegram context');
-            showStatus('Please open this app in Telegram', 'error');
-        }
         
         function showStatus(message, type) {
             const status = document.getElementById('status');
             status.textContent = message;
             status.className = `status ${type}`;
-            status.style.display = 'block';
         }
         
-        function startBot() {
+        function sendTestData() {
             try {
-                // Проверяем, что мы в Telegram
                 if (!tg || !tg.initDataUnsafe) {
-                    showStatus('Please open this app in Telegram', 'error');
+                    showStatus('Not in Telegram context', 'error');
                     return;
                 }
                 
-                showStatus('Starting bot...', 'loading');
-                
-                // Получаем данные пользователя
-                const user = tg.initDataUnsafe.user;
-                if (!user) {
-                    throw new Error('User data not available');
-                }
-                
-                console.log('User data:', user);
-                console.log('Init data:', tg.initData);
-                
-                // Отправляем данные в бот через sendData
                 const data = JSON.stringify({
-                    action: 'start',
-                    user_id: user.id,
+                    action: 'test',
+                    user_id: tg.initDataUnsafe.user?.id,
+                    message: 'Hello from Mini App!',
                     timestamp: Date.now()
                 });
                 
-                console.log('Sending data:', data);
-                
-                // Отправляем данные в бот
+                console.log('Sending test data:', data);
                 tg.sendData(data);
-                
-                showStatus('Bot started successfully!', 'success');
-                
-                // Закрываем Mini App после успешной отправки
-                setTimeout(() => {
-                    tg.close();
-                }, 2000);
+                showStatus('Test data sent!', 'success');
                 
             } catch (error) {
-                console.error('Error starting bot:', error);
+                console.error('Error sending test data:', error);
                 showStatus(`Error: ${error.message}`, 'error');
             }
         }
         
-        // Обработка событий от Telegram
-        if (tg) {
-            tg.onEvent('mainButtonClicked', function() {
-                startBot();
-            });
-            
-            // Показываем главную кнопку
-            tg.MainButton.setText('START BOT');
-            tg.MainButton.show();
-            tg.MainButton.onClick(startBot);
+        function sendStartData() {
+            try {
+                if (!tg || !tg.initDataUnsafe) {
+                    showStatus('Not in Telegram context', 'error');
+                    return;
+                }
+                
+                const data = JSON.stringify({
+                    action: 'start',
+                    user_id: tg.initDataUnsafe.user?.id,
+                    timestamp: Date.now()
+                });
+                
+                console.log('Sending start data:', data);
+                tg.sendData(data);
+                showStatus('Start data sent!', 'success');
+                
+            } catch (error) {
+                console.error('Error sending start data:', error);
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize
+        if (tg && tg.initDataUnsafe) {
+            tg.ready();
+            tg.expand();
+            console.log('Telegram WebApp initialized');
+            console.log('User:', tg.initDataUnsafe.user);
+            showStatus('Ready to send data', 'success');
+        } else {
+            console.log('Not in Telegram context');
+            showStatus('Please open in Telegram', 'error');
         }
     </script>
 </body>
