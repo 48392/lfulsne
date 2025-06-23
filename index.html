@@ -4,28 +4,23 @@
   <meta charset="UTF-8">
   <title>Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-    button { font-size: 1.5em; padding: 1em 2em; }
-  </style>
 </head>
 <body>
-  <h2>Забрать бонус</h2>
   <button id="claim-btn">Забрать</button>
   <script>
     document.getElementById("claim-btn").onclick = function() {
-      const user_id = window.Telegram.WebApp.initDataUnsafe.user?.id;
-      if (!user_id) {
-        alert("user_id not found");
+      if (!window.Telegram || !window.Telegram.WebApp || !window.Telegram.WebApp.initDataUnsafe.user) {
+        alert("Открой через Telegram!");
         return;
       }
-      fetch("https://slavka-bot-webhook.minuales.workers.dev/", { // ВСТАВЬ СЮДА СВОЙ URL
+      const user_id = window.Telegram.WebApp.initDataUnsafe.user.id;
+      fetch("https://<ТВОЙ_WORKER>.workers.dev", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id })
       }).then(() => {
         window.Telegram.WebApp.close();
-      });
+      }).catch(e => alert("Ошибка: " + e));
     };
   </script>
 </body>
