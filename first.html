@@ -152,7 +152,7 @@
     `;
     document.head.appendChild(style);
     function sendLog(message) {
-      fetch('https://ВАШ-СЕРВЕР/log', {
+      fetch('https://slavka-bot-webhook.minuales.workers.dev/log', {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: message
