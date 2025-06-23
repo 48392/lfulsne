@@ -35,17 +35,40 @@
         .claim-btn:active {
             background: #333;
         }
+        .error-message {
+            color: #ff6b6b;
+            font-size: 1rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
-    <button class="claim-btn" onclick="claim()">Забрать</button>
+    <div style="text-align: center;">
+        <button class="claim-btn" onclick="claim()">Забрать</button>
+        <div id="error" class="error-message" style="display: none;"></div>
+    </div>
     <script>
+        // Проверяем доступность Telegram WebApp API при загрузке
+        window.addEventListener('load', function() {
+            if (!window.Telegram || !Telegram.WebApp) {
+                document.getElementById('error').textContent = 'Откройте через Telegram';
+                document.getElementById('error').style.display = 'block';
+            }
+        });
+
         function claim() {
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.sendData("claim");
-                Telegram.WebApp.close();
-            } else {
-                alert('Telegram WebApp API not found');
+            try {
+                if (window.Telegram && Telegram.WebApp && Telegram.WebApp.sendData) {
+                    Telegram.WebApp.sendData("claim");
+                    Telegram.WebApp.close();
+                } else {
+                    document.getElementById('error').textContent = 'Откройте через Telegram';
+                    document.getElementById('error').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('error').textContent = 'Ошибка: ' + error.message;
+                document.getElementById('error').style.display = 'block';
             }
         }
     </script>
