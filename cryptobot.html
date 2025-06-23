@@ -36,31 +36,32 @@
     }
     .slot-wrapper {
       position: relative;
-      width: 100vw;
-      max-width: 320px;
+      width: 100%;
+      max-width: 280px;
       height: 150px;
       margin: 0 auto;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
     }
     .arrow {
-      position: absolute;
-      left: -40px;
-      top: 50%;
-      transform: translateY(-50%);
+      position: relative;
+      left: 0;
+      top: 0;
+      transform: none;
       font-size: 40px;
       color: #00ff66;
       text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
       animation: pulse 1s infinite;
       z-index: 2;
+      margin-right: 8px;
       display: block;
     }
     @keyframes pulse {
-      0% { transform: translateY(-50%) scale(1); }
-      50% { transform: translateY(-50%) scale(1.1); }
-      100% { transform: translateY(-50%) scale(1); }
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
     }
     .slot-mask {
       height: 150px;
@@ -71,11 +72,14 @@
       box-shadow: 0 0 20px rgba(255, 230, 0, 0.2);
       transform-style: preserve-3d;
       position: relative;
-      transform: rotateX(10deg);
+      transform: none;
       width: 100%;
-      max-width: 320px;
+      max-width: 220px;
       margin: 0 auto;
       box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .slot-strip {
       display: flex;
@@ -84,6 +88,8 @@
       transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1);
       position: absolute;
       width: 100%;
+      left: 0;
+      top: 0;
       transform-style: preserve-3d;
     }
     .slot-item {
@@ -100,23 +106,6 @@
       transform-style: preserve-3d;
       transition: all 0.3s ease;
     }
-    .win-line {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 50px;
-      border-top: 3px solid #00ff99;
-      border-bottom: 3px solid #00ff99;
-      z-index: 1;
-      top: 50px;
-      box-shadow: 0 0 15px rgba(0, 255, 153, 0.5);
-      background: linear-gradient(to bottom, 
-        rgba(0, 255, 153, 0.1) 0%,
-        rgba(0, 255, 153, 0) 50%,
-        rgba(0, 255, 153, 0.1) 100%
-      );
-      display: block;
-    }
     button {
       background: linear-gradient(45deg, #444 0%, #666 100%);
       color: white;
@@ -132,7 +121,7 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       display: block;
       width: 90%;
-      max-width: 320px;
+      max-width: 220px;
     }
     button:hover {
       background: linear-gradient(45deg, #555 0%, #777 100%);
@@ -151,7 +140,7 @@
       animation: winGlow 1s infinite alternate;
       text-align: center;
       width: 100%;
-      max-width: 320px;
+      max-width: 220px;
       margin-left: auto;
       margin-right: auto;
       display: block;
@@ -168,10 +157,9 @@
       font-weight: bold;
       padding: 15px 50px;
       width: 90%;
-      max-width: 320px;
+      max-width: 220px;
       border-radius: 12px;
       text-align: center;
-      display: block;
     }
     #claim-btn:hover {
       background: linear-gradient(45deg, #ffd700 0%, #ffcc00 100%);
@@ -202,7 +190,6 @@
   <div id="attempts">У вас попыток 1</div>
   <div class="slot-wrapper">
     <div class="arrow">➤</div>
-    <div class="win-line"></div>
     <div class="slot-mask">
       <div class="slot-strip" id="slot-strip"></div>
     </div>
