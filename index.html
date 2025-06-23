@@ -3,198 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест Worker</title>
+    <title>Многоэтапная система</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
         }
-        .test-section {
-            margin: 20px 0;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(10px);
         }
-        button {
-            background: #007bff;
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .claim-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
-            margin: 5px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
-        button:hover {
-            background: #0056b3;
+
+        .claim-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
         }
-        .result {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            white-space: pre-wrap;
+
+        .claim-button:active {
+            transform: translateY(0);
         }
-        .success {
+
+        .claim-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
             background: #d4edda;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
-        .error {
+
+        .status.error {
             background: #f8d7da;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
-        input {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+
+        .status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .user-info strong {
+            color: #333;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .feature-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .feature-desc {
+            font-size: 10px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .subtitle {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🧪 Тест Cloudflare Worker</h1>
-    
-    <div class="test-section">
-        <h3>1. Настройка URL</h3>
-        <label>URL Worker'а:</label>
-        <input type="text" id="workerUrl" placeholder="https://slavka-bot-webhook.minuales.workers.dev/" value="">
-        <br>
-        <label>User ID для теста:</label>
-        <input type="number" id="testUserId" placeholder="7167238342" value="7167238342">
-    </div>
+    <div class="container">
+        <div class="logo">🚀</div>
+        <h1>Многоэтапная система</h1>
+        <p class="subtitle">Нажмите кнопку ниже, чтобы запустить многоэтапную цепочку сообщений в боте</p>
+        
+        <div class="user-info" id="userInfo">
+            <strong>Пользователь:</strong> Загрузка...
+        </div>
 
-    <div class="test-section">
-        <h3>2. Тест GET запроса (Health Check)</h3>
-        <button onclick="testGet()">🔍 Проверить доступность</button>
-        <div id="getResult" class="result"></div>
-    </div>
+        <button class="claim-button" id="claimButton" onclick="sendStartCommand()">
+            🚀 Запустить систему
+        </button>
 
-    <div class="test-section">
-        <h3>3. Тест POST запроса (Отправка команды)</h3>
-        <button onclick="testPost()">📤 Отправить команду /start</button>
-        <div id="postResult" class="result"></div>
-    </div>
+        <div class="status" id="status"></div>
 
-    <div class="test-section">
-        <h3>4. Логи</h3>
-        <button onclick="clearLogs()">🗑️ Очистить логи</button>
-        <div id="logs" class="result" style="background: #f8f9fa; max-height: 300px; overflow-y: auto;"></div>
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <div class="feature-title">Mini App</div>
+                <div class="feature-desc">Интеграция с Telegram</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔗</div>
+                <div class="feature-title">Webhook</div>
+                <div class="feature-desc">Cloudflare Worker</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Этапы</div>
+                <div class="feature-desc">Многоэтапная система</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <div class="feature-title">Депозиты</div>
+                <div class="feature-desc">Верификация</div>
+            </div>
+        </div>
     </div>
 
     <script>
-        function log(message) {
-            const logs = document.getElementById('logs');
-            const timestamp = new Date().toLocaleTimeString();
-            logs.textContent += `[${timestamp}] ${message}\n`;
-            logs.scrollTop = logs.scrollHeight;
+        // Инициализация Telegram WebApp
+        let tg = window.Telegram.WebApp;
+        
+        // Настройка темы
+        tg.expand();
+        tg.ready();
+        
+        // Получаем информацию о пользователе
+        const user = tg.initDataUnsafe?.user;
+        const userInfoDiv = document.getElementById('userInfo');
+        
+        if (user) {
+            userInfoDiv.innerHTML = `
+                <strong>Пользователь:</strong> ${user.first_name || 'Неизвестно'}<br>
+                <strong>ID:</strong> ${user.id}<br>
+                ${user.username ? `<strong>Username:</strong> @${user.username}` : ''}
+            `;
+        } else {
+            userInfoDiv.innerHTML = '<strong>Пользователь:</strong> Не определен';
         }
 
-        function clearLogs() {
-            document.getElementById('logs').textContent = '';
-        }
-
-        async function testGet() {
-            const workerUrl = document.getElementById('workerUrl').value.trim();
-            const resultDiv = document.getElementById('getResult');
+        // Функция отправки команды /start
+        async function sendStartCommand() {
+            const button = document.getElementById('claimButton');
+            const status = document.getElementById('status');
             
-            if (!workerUrl) {
-                resultDiv.textContent = '❌ Введите URL worker\'а';
-                resultDiv.className = 'result error';
+            // Проверяем наличие пользователя
+            if (!user || !user.id) {
+                showStatus('Ошибка: Пользователь не определен', 'error');
                 return;
             }
 
-            log(`🔍 Тестируем GET запрос к: ${workerUrl}`);
-            
-            try {
-                const response = await fetch(workerUrl, {
-                    method: 'GET'
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    resultDiv.textContent = `✅ Успешно!\nСтатус: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`;
-                    resultDiv.className = 'result success';
-                    log(`✅ GET запрос успешен: ${response.status}`);
-                } else {
-                    resultDiv.textContent = `❌ Ошибка!\nСтатус: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`;
-                    resultDiv.className = 'result error';
-                    log(`❌ GET запрос неуспешен: ${response.status}`);
-                }
-            } catch (error) {
-                resultDiv.textContent = `❌ Ошибка сети: ${error.message}`;
-                resultDiv.className = 'result error';
-                log(`❌ Ошибка сети: ${error.message}`);
-            }
-        }
-
-        async function testPost() {
-            const workerUrl = document.getElementById('workerUrl').value.trim();
-            const userId = document.getElementById('testUserId').value;
-            const resultDiv = document.getElementById('postResult');
-            
-            if (!workerUrl) {
-                resultDiv.textContent = '❌ Введите URL worker\'а';
-                resultDiv.className = 'result error';
-                return;
-            }
-
-            if (!userId) {
-                resultDiv.textContent = '❌ Введите User ID';
-                resultDiv.className = 'result error';
-                return;
-            }
-
-            log(`📤 Тестируем POST запрос к: ${workerUrl} для пользователя: ${userId}`);
-            
-            const requestData = {
-                user_id: parseInt(userId),
-                stage: 1,
-                action: 'claim',
-                source: 'test_webpage',
-                timestamp: new Date().toISOString(),
-                user_info: {
-                    first_name: 'Test',
-                    last_name: 'User',
-                    username: 'testuser',
-                    language_code: 'ru'
-                }
-            };
+            // Отключаем кнопку и показываем загрузку
+            button.disabled = true;
+            button.textContent = '⏳ Отправка...';
+            showStatus('Отправляем команду /start в бот...', 'loading');
 
             try {
-                const response = await fetch(workerUrl, {
+                // Данные для отправки
+                const requestData = {
+                    user_id: user.id,
+                    stage: 1,
+                    action: 'claim',
+                    source: 'telegram_miniapp',
+                    timestamp: new Date().toISOString(),
+                    user_info: {
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        username: user.username,
+                        language_code: user.language_code
+                    }
+                };
+
+                console.log('📤 Отправляем данные:', requestData);
+
+                // ⚠️ ЗАМЕНИ ЭТОТ URL НА ТВОЙ РЕАЛЬНЫЙ CLOUDFLARE WORKER URL
+                // Пример: https://my-worker.my-subdomain.workers.dev
+                const response = await fetch('https://slavka-bot-webhook.minuales.workers.dev', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(requestData)
                 });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    resultDiv.textContent = `✅ Успешно!\nСтатус: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`;
-                    resultDiv.className = 'result success';
-                    log(`✅ POST запрос успешен: ${response.status}`);
-                } else {
-                    resultDiv.textContent = `❌ Ошибка!\nСтатус: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`;
-                    resultDiv.className = 'result error';
-                    log(`❌ POST запрос неуспешен: ${response.status}`);
+
+                console.log('📥 Получен ответ:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+
+                const result = await response.json();
+                console.log('📥 Результат:', result);
+
+                if (result.status === 'success') {
+                    showStatus('✅ Команда /start успешно отправлена! Проверьте бота.', 'success');
+                    button.textContent = '✅ Отправлено';
+                    
+                    // Показываем уведомление в Telegram
+                    tg.showAlert('Команда /start отправлена! Проверьте бота.');
+                    
+                } else {
+                    throw new Error(result.error || 'Неизвестная ошибка');
+                }
+
             } catch (error) {
-                resultDiv.textContent = `❌ Ошибка сети: ${error.message}`;
-                resultDiv.className = 'result error';
-                log(`❌ Ошибка сети: ${error.message}`);
+                console.error('❌ Ошибка:', error);
+                showStatus(`❌ Ошибка: ${error.message}`, 'error');
+                button.textContent = '🚀 Запустить систему';
+                button.disabled = false;
+                
+                // Показываем ошибку в Telegram
+                tg.showAlert(`Ошибка: ${error.message}`);
             }
         }
 
-        // Автозаполнение URL при загрузке
-        window.addEventListener('load', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const workerUrl = urlParams.get('worker');
-            if (workerUrl) {
-                document.getElementById('workerUrl').value = workerUrl;
+        // Функция показа статуса
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            // Скрываем статус через 5 секунд
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+
+        // Обработка ошибок
+        window.addEventListener('error', (event) => {
+            console.error('❌ Глобальная ошибка:', event.error);
+            showStatus(`❌ Ошибка: ${event.error.message}`, 'error');
+        });
+
+        // Проверка доступности worker при загрузке
+        window.addEventListener('load', async () => {
+            try {
+                // ⚠️ ЗАМЕНИ ЭТОТ URL НА ТВОЙ РЕАЛЬНЫЙ CLOUDFLARE WORKER URL
+                // Пример: https://my-worker.my-subdomain.workers.dev
+                const response = await fetch('https://slavka-bot-webhook.minuales.workers.dev', {
+                    method: 'GET'
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Worker доступен');
+                } else {
+                    console.warn('⚠️ Worker недоступен:', response.status);
+                }
+            } catch (error) {
+                console.warn('⚠️ Не удалось проверить worker:', error.message);
             }
         });
     </script>
