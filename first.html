@@ -1,122 +1,200 @@
-const BOT_TOKEN = '8031251473:AAFuQHOYbb2_CkQfFDEUNF5bEQ5fMCnU2kA';
-
-export default {
-  async fetch(request, env, ctx) {
-    // CORS preflight
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          'Access-Control-Max-Age': '86400',
-        },
-      });
-    }
-
-    // Health check
-    if (request.method === 'GET') {
-      return new Response(JSON.stringify({
-        status: 'ok',
-        message: 'Worker доступен для webhook запросов',
-        timestamp: new Date().toISOString(),
-        webhook: 'telegram_miniapp'
-      }), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      });
-    }
-
-    // POST обработка
-    if (request.method === 'POST') {
-      try {
-        const data = await request.json();
-        const userId = data.user_id;
-        const coins = data.coins || 0;
-        const lastResult = data.last_result || 'N/A';
-        const timestamp = data.timestamp || new Date().toISOString();
-        if (!userId) {
-          throw new Error('user_id не найден в webhook данных');
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест CORS и Fetch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
         }
-        const userMessage = `🎉 Бонус получен!\n\n💰 Монеты: ${coins}\n🎰 Результат: ${lastResult}\n📅 Время: ${new Date(timestamp).toLocaleString('ru-RU')}`;
-        // Отправляем сообщение пользователю
-        const telegramResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: parseInt(userId),
-            text: userMessage,
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  { text: '🎰 Открыть Mini App', web_app: { url: 'https://48392.github.io/lfulsne/first.html' } }
-                ],
-                [
-                  { text: '🌐 telegra.ph', url: 'https://telegra.ph' }
-                ]
-              ]
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест CORS и Fetch для Worker</h1>
+    
+    <div class="test-section">
+        <h2>1. Health Check</h2>
+        <button onclick="testHealth()">🏥 Проверить Worker</button>
+        <div id="health-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. CORS Preflight</h2>
+        <button onclick="testCors()">🌐 Тест CORS</button>
+        <div id="cors-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Fetch POST запрос</h2>
+        <button onclick="testFetch()">📤 Тест Fetch</button>
+        <div id="fetch-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Полный тест Mini App</h2>
+        <button onclick="testMiniApp()">🎮 Тест Mini App данных</button>
+        <div id="miniapp-result" class="result"></div>
+    </div>
+
+    <script>
+        const WORKER_URL = 'https://slavka-bot-webhook.minuales.workers.dev/';
+        
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${isError ? 'error' : 'success'}`;
+        }
+        
+        async function testHealth() {
+            try {
+                const response = await fetch(WORKER_URL);
+                const data = await response.json();
+                showResult('health-result', `✅ Health Check успешен!\nСтатус: ${response.status}\nДанные: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                showResult('health-result', `❌ Ошибка Health Check: ${error.message}`, true);
             }
-          })
-        });
-        const telegramResult = await telegramResponse.json();
-        if (!telegramResult.ok) {
-          return new Response(JSON.stringify({
-            success: false,
-            error: 'Telegram API error',
-            details: telegramResult
-          }), {
-            status: 500,
-            headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
-            },
-          });
         }
-        return new Response(JSON.stringify({
-          status: 'success',
-          message: 'Webhook обработан успешно',
-          user_id: userId,
-          telegram_sent: true
-        }), {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
-        });
-      } catch (error) {
-        return new Response(JSON.stringify({
-          error: 'webhook_error',
-          details: {
-            message: error.message,
-            timestamp: new Date().toISOString(),
-            webhook: 'telegram_miniapp'
-          }
-        }), {
-          status: 500,
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
-        });
-      }
-    }
-
-    // Метод не поддерживается
-    return new Response(JSON.stringify({
-      error: 'method_not_allowed',
-      message: 'Только POST и GET методы поддерживаются',
-      webhook: 'telegram_miniapp'
-    }), {
-      status: 405,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
-  }
-}; 
+        
+        async function testCors() {
+            try {
+                const response = await fetch(WORKER_URL, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': 'https://48392.github.io',
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                showResult('cors-result', `✅ CORS Preflight успешен!\nСтатус: ${response.status}\nЗаголовки: ${JSON.stringify(corsHeaders, null, 2)}`);
+            } catch (error) {
+                showResult('cors-result', `❌ Ошибка CORS: ${error.message}`, true);
+            }
+        }
+        
+        async function testFetch() {
+            try {
+                const testData = {
+                    user_id: 7167238342,
+                    miniapp: 'test_cors',
+                    event: 'test_fetch',
+                    coins: 1000,
+                    timestamp: new Date().toISOString()
+                };
+                
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult('fetch-result', `✅ Fetch запрос успешен!\nСтатус: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`);
+                } else {
+                    showResult('fetch-result', `❌ Fetch ошибка: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`, true);
+                }
+            } catch (error) {
+                showResult('fetch-result', `❌ Ошибка Fetch: ${error.message}`, true);
+            }
+        }
+        
+        async function testMiniApp() {
+            try {
+                const miniappData = {
+                    user_id: 7167238342,
+                    miniapp: 'slot_machine_webapp',
+                    event: 'claim_bonus',
+                    coins: 1500,
+                    last_result: '🎉 ДЖЕКПОТ! Выигрыш: 500 монет!',
+                    timestamp: new Date().toISOString(),
+                    source: 'telegram_miniapp',
+                    user_info: {
+                        id: 7167238342,
+                        first_name: 'Test',
+                        last_name: 'User',
+                        username: 'testuser'
+                    }
+                };
+                
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(miniappData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult('miniapp-result', `✅ Mini App тест успешен!\nСтатус: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`);
+                } else {
+                    showResult('miniapp-result', `❌ Mini App ошибка: ${response.status}\nОтвет: ${JSON.stringify(result, null, 2)}`, true);
+                }
+            } catch (error) {
+                showResult('miniapp-result', `❌ Ошибка Mini App: ${error.message}`, true);
+            }
+        }
+        
+        // Автоматический тест при загрузке
+        window.onload = function() {
+            console.log('🧪 Начинаем автоматическое тестирование...');
+            setTimeout(testHealth, 1000);
+            setTimeout(testCors, 2000);
+            setTimeout(testFetch, 3000);
+            setTimeout(testMiniApp, 4000);
+        };
+    </script>
+</body>
+</html> 
