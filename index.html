@@ -220,38 +220,53 @@
                     throw new Error('User ID not available');
                 }
 
+                // Подготавливаем данные в формате, который ожидает ваш Worker
+                const requestData = {
+                    user_id: user.id,
+                    command: '/start',
+                    source: 'telegram_miniapp',
+                    timestamp: new Date().toISOString(),
+                    user_info: {
+                        first_name: user.first_name || '',
+                        username: user.username || '',
+                        language_code: user.language_code || 'en'
+                    }
+                };
+
+                console.log('📤 Отправляем данные в Worker:', requestData);
+
                 // Отправляем команду через Cloudflare Worker
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        user_id: user.id,
-                        command: '/start'
-                    })
+                    body: JSON.stringify(requestData)
                 });
+
+                console.log('📥 Получен ответ от Worker:', response.status);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const result = await response.json();
+                console.log('📥 Результат от Worker:', result);
                 
-                if (result.success) {
-                    showStatus('✅ Command sent successfully! Check your bot for the next message.', 'success');
+                if (result.status === 'success') {
+                    showStatus('✅ Команда отправлена! Проверьте бота для продолжения.', 'success');
                     
                     // Закрываем Mini App после успешной отправки
                     setTimeout(() => {
                         tg.close();
                     }, 2000);
                 } else {
-                    throw new Error(result.error || 'Unknown error');
+                    throw new Error(result.error || result.message || 'Unknown error');
                 }
 
             } catch (error) {
-                console.error('Error sending command:', error);
-                showStatus(`❌ Error: ${error.message}`, 'error');
+                console.error('❌ Error sending command:', error);
+                showStatus(`❌ Ошибка: ${error.message}`, 'error');
                 
                 // Возвращаем кнопку в исходное состояние
                 button.innerHTML = originalText;
