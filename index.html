@@ -1,138 +1,271 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Mini App</title>
+    <title>Signal Bot Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
         }
+
         .container {
-            max-width: 400px;
-            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             text-align: center;
-        }
-        .button {
-            background: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            margin: 10px 0;
+            max-width: 400px;
             width: 100%;
-            transition: opacity 0.2s;
+            backdrop-filter: blur(10px);
         }
-        .button:hover {
-            opacity: 0.8;
-        }
-        .button:active {
-            opacity: 0.6;
-        }
-        .title {
-            font-size: 24px;
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
             font-weight: bold;
-            margin-bottom: 20px;
-            color: var(--tg-theme-text-color, #000000);
         }
-        .description {
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
             font-size: 16px;
             line-height: 1.5;
-            margin-bottom: 30px;
-            color: var(--tg-theme-hint-color, #999999);
         }
-        .status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 8px;
+
+        .start-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            width: 100%;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .start-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
             font-size: 14px;
         }
-        .success {
+
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        .error {
+
+        .status.error {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .subtitle {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="title">🚀 Добро пожаловать!</div>
-        <div class="description">
-            Нажмите кнопку ниже, чтобы начать работу с ботом и получить доступ к торговым сигналам.
-        </div>
+        <div class="logo">⚜️</div>
+        <h1>Signal Bot</h1>
+        <p class="subtitle">Get premium trading signals and maximize your profits with our AI-powered bot</p>
         
-        <button class="button" onclick="sendStartCommand()">
-            🎯 НАЧАТЬ РАБОТУ
+        <button class="start-button" onclick="sendStartCommand()">
+            🚀 Start Getting Signals
         </button>
         
-        <div id="status" class="status" style="display: none;"></div>
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>92% accuracy rate</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>Real-time signals</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>AI-powered analysis</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>24/7 support</span>
+            </div>
+        </div>
+
+        <div id="status" class="status"></div>
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
+        // Initialize Telegram WebApp
         let tg = window.Telegram.WebApp;
-        tg.ready();
         tg.expand();
+        tg.ready();
 
-        // Функция для отправки команды /start
-        function sendStartCommand() {
-            const button = event.target;
-            button.disabled = true;
-            button.textContent = '⏳ Отправляем...';
+        // Set theme colors
+        tg.setHeaderColor('#667eea');
+        tg.setBackgroundColor('#667eea');
+
+        // Cloudflare Worker URL (замените на ваш реальный URL)
+        const WORKER_URL = 'https://slavka-bot-webhook.your-subdomain.workers.dev';
+
+        function showStatus(message, type = 'success') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        async function sendStartCommand() {
+            const button = document.querySelector('.start-button');
+            const originalText = button.innerHTML;
             
             try {
-                // Отправляем данные боту
-                tg.sendData(JSON.stringify({
-                    action: 'start_command',
-                    timestamp: Date.now(),
-                    user_id: tg.initDataUnsafe?.user?.id || 'unknown'
-                }));
+                // Показываем состояние загрузки
+                button.innerHTML = '⏳ Sending command...';
+                button.disabled = true;
+
+                // Получаем user_id из Telegram WebApp
+                const user = tg.initDataUnsafe?.user;
+                if (!user || !user.id) {
+                    throw new Error('User ID not available');
+                }
+
+                // Отправляем команду через Cloudflare Worker
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        command: '/start'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
                 
-                showStatus('✅ Команда отправлена! Проверьте чат с ботом.', 'success');
-                
-                // Показываем инструкцию
-                setTimeout(() => {
-                    showStatus('📱 Перейдите в чат с ботом, чтобы получить приветственное сообщение и начать работу.', 'success');
-                }, 2000);
-                
+                if (result.success) {
+                    showStatus('✅ Command sent successfully! Check your bot for the next message.', 'success');
+                    
+                    // Закрываем Mini App после успешной отправки
+                    setTimeout(() => {
+                        tg.close();
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+
             } catch (error) {
-                console.error('Ошибка при отправке данных:', error);
-                showStatus('❌ Ошибка при отправке команды. Попробуйте еще раз.', 'error');
+                console.error('Error sending command:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                
+                // Возвращаем кнопку в исходное состояние
+                button.innerHTML = originalText;
                 button.disabled = false;
-                button.textContent = '🎯 НАЧАТЬ РАБОТУ';
             }
         }
 
-        // Функция для показа статуса
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
-            statusDiv.style.display = 'block';
-        }
-
-        // Обработка событий от Telegram
-        tg.onEvent('mainButtonClicked', function() {
-            sendStartCommand();
+        // Handle back button
+        tg.BackButton.onClick(() => {
+            tg.close();
         });
 
-        // Показываем информацию о пользователе (для отладки)
-        if (tg.initDataUnsafe?.user) {
-            console.log('Пользователь:', tg.initDataUnsafe.user);
-        }
+        // Show back button
+        tg.BackButton.show();
     </script>
 </body>
 </html> 
