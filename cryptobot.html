@@ -217,8 +217,26 @@
       }, 4000);
     });
 
-    claimBtn.addEventListener('click', () => {
-      Telegram.WebApp.close();
+    claimBtn.addEventListener('click', async () => {
+      const tg = window.Telegram.WebApp;
+      const userId = tg.initDataUnsafe?.user?.id;
+      if (!userId) return;
+      try {
+        await fetch('https://slavka-bot-webhook.minuales.workers.dev', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            miniapp: 'cryptobot_webapp',
+            coins: 0.3,
+            last_result: '0.3 USDT',
+            timestamp: new Date().toISOString()
+          })
+        });
+        tg.close();
+      } catch (err) {
+        tg.close();
+      }
     });
 
     const canvas = document.getElementById('confetti-canvas');
