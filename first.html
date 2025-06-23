@@ -48,7 +48,7 @@
         document.getElementById('result').textContent = 'Бонус отправлен!';
         setTimeout(() => { tg.close(); }, 800);
       } catch (err) {
-        document.getElementById('result').textContent = 'Ошибка fetch: ' + err.message;
+        document.getElementById('result').textContent = 'Ошибка fetch: ' + err.message + '\\n' + JSON.stringify(err, null, 2);
         document.getElementById('claimBtn').disabled = false;
       }
     };
