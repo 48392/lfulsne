@@ -11,9 +11,18 @@
 
   <script>
     function claim() {
+      // Проверяем, загружен ли Telegram.WebApp
+      if (!window.Telegram || !Telegram.WebApp) {
+        alert("Ошибка: Мини-приложение должно запускаться из Telegram");
+        return;
+      }
+
+      Telegram.WebApp.ready(); // Сообщаем Telegram, что всё готово
+
       const user = Telegram.WebApp.initDataUnsafe?.user;
+
       if (!user) {
-        alert("Ошибка: не удалось получить данные пользователя.");
+        alert("Ошибка: Не удалось получить данные пользователя. Пожалуйста, откройте это приложение через Telegram.");
         return;
       }
 
