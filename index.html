@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading Bot Mini App</title>
+    <title>Telegram Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -16,26 +16,19 @@
         .container {
             max-width: 400px;
             margin: 0 auto;
-        }
-        .header {
             text-align: center;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            color: var(--tg-theme-text-color, #000000);
-            margin: 0;
-            font-size: 24px;
         }
         .button {
-            background: var(--tg-theme-button-color, #0088cc);
+            background: var(--tg-theme-button-color, #2481cc);
             color: var(--tg-theme-button-text-color, #ffffff);
             border: none;
-            padding: 12px 24px;
             border-radius: 8px;
+            padding: 12px 24px;
             font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
-            width: 100%;
             margin: 10px 0;
+            width: 100%;
             transition: opacity 0.2s;
         }
         .button:hover {
@@ -44,147 +37,102 @@
         .button:active {
             opacity: 0.6;
         }
-        .status {
-            text-align: center;
-            margin: 20px 0;
-            padding: 10px;
-            border-radius: 8px;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--tg-theme-text-color, #000000);
         }
-        .input-group {
-            margin: 15px 0;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
+        .description {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 30px;
             color: var(--tg-theme-hint-color, #999999);
         }
-        .input-group input {
-            width: 100%;
+        .status {
+            margin-top: 20px;
             padding: 10px;
-            border: 1px solid var(--tg-theme-hint-color, #cccccc);
             border-radius: 8px;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🚀 Trading Bot</h1>
-            <p>Get started with trading signals</p>
+        <div class="title">🚀 Добро пожаловать!</div>
+        <div class="description">
+            Нажмите кнопку ниже, чтобы начать работу с ботом и получить доступ к торговым сигналам.
         </div>
-
-        <div class="status" id="status">
-            Ready to start trading!
-        </div>
-
-        <button class="button" onclick="startTrading()">
-            🎯 Start Trading
+        
+        <button class="button" onclick="sendStartCommand()">
+            🎯 НАЧАТЬ РАБОТУ
         </button>
-
-        <div class="input-group">
-            <label for="deposit">Deposit Amount ($):</label>
-            <input type="number" id="deposit" placeholder="Enter amount" value="100">
-        </div>
-
-        <button class="button" onclick="confirmDeposit()">
-            💰 Confirm Deposit
-        </button>
-
-        <button class="button" onclick="sendTestData()">
-            🧪 Send Test Data
-        </button>
+        
+        <div id="status" class="status" style="display: none;"></div>
     </div>
 
     <script>
-        // Инициализация Telegram Web App
+        // Инициализация Telegram WebApp
         let tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
-        // Устанавливаем тему
-        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
-        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
-        document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#0088cc');
-        document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
-        document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#999999');
-        document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color || '#f0f0f0');
-
-        function updateStatus(message) {
-            document.getElementById('status').textContent = message;
-        }
-
-        function startTrading() {
-            updateStatus('Starting trading...');
-            
-            // Отправляем данные через tg.sendData()
-            const data = {
-                action: 'start',
-                timestamp: Date.now()
-            };
+        // Функция для отправки команды /start
+        function sendStartCommand() {
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = '⏳ Отправляем...';
             
             try {
-                tg.sendData(JSON.stringify(data));
-                updateStatus('✅ Start command sent!');
-                console.log('Sent start data:', data);
+                // Отправляем данные боту
+                tg.sendData(JSON.stringify({
+                    action: 'start_command',
+                    timestamp: Date.now(),
+                    user_id: tg.initDataUnsafe?.user?.id || 'unknown'
+                }));
+                
+                showStatus('✅ Команда отправлена! Проверьте чат с ботом.', 'success');
+                
+                // Показываем инструкцию
+                setTimeout(() => {
+                    showStatus('📱 Перейдите в чат с ботом, чтобы получить приветственное сообщение и начать работу.', 'success');
+                }, 2000);
+                
             } catch (error) {
-                updateStatus('❌ Error sending data: ' + error.message);
-                console.error('Error sending data:', error);
+                console.error('Ошибка при отправке данных:', error);
+                showStatus('❌ Ошибка при отправке команды. Попробуйте еще раз.', 'error');
+                button.disabled = false;
+                button.textContent = '🎯 НАЧАТЬ РАБОТУ';
             }
         }
 
-        function confirmDeposit() {
-            const amount = document.getElementById('deposit').value;
-            if (!amount || amount <= 0) {
-                updateStatus('❌ Please enter a valid amount');
-                return;
-            }
-
-            updateStatus('Confirming deposit...');
-            
-            const data = {
-                action: 'deposit',
-                amount: parseFloat(amount),
-                timestamp: Date.now()
-            };
-            
-            try {
-                tg.sendData(JSON.stringify(data));
-                updateStatus('✅ Deposit confirmed!');
-                console.log('Sent deposit data:', data);
-            } catch (error) {
-                updateStatus('❌ Error confirming deposit: ' + error.message);
-                console.error('Error sending deposit data:', error);
-            }
+        // Функция для показа статуса
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
         }
 
-        function sendTestData() {
-            updateStatus('Sending test data...');
-            
-            const data = {
-                action: 'test',
-                message: 'Hello from Mini App!',
-                timestamp: Date.now()
-            };
-            
-            try {
-                tg.sendData(JSON.stringify(data));
-                updateStatus('✅ Test data sent!');
-                console.log('Sent test data:', data);
-            } catch (error) {
-                updateStatus('❌ Error sending test data: ' + error.message);
-                console.error('Error sending test data:', error);
-            }
-        }
+        // Обработка событий от Telegram
+        tg.onEvent('mainButtonClicked', function() {
+            sendStartCommand();
+        });
 
-        // Логируем информацию о Web App
-        console.log('Telegram Web App initialized');
-        console.log('User:', tg.initDataUnsafe?.user);
-        console.log('Chat:', tg.initDataUnsafe?.chat);
-        console.log('Theme:', tg.themeParams);
+        // Показываем информацию о пользователе (для отладки)
+        if (tg.initDataUnsafe?.user) {
+            console.log('Пользователь:', tg.initDataUnsafe.user);
+        }
     </script>
 </body>
 </html> 
