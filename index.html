@@ -14,7 +14,7 @@
         return;
       }
       const user_id = window.Telegram.WebApp.initDataUnsafe.user.id;
-      fetch("https://<ТВОЙ_WORKER>.workers.dev", {
+      fetch("https://slavka-bot-webhook.minuales.workers.dev/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id })
