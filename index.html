@@ -1,286 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signal Bot Mini App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-            backdrop-filter: blur(10px);
-        }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            color: white;
-            font-weight: bold;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 16px;
-            line-height: 1.5;
-        }
-
-        .start-button {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 30px;
-            width: 100%;
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .start-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .start-button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .features {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .feature {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #555;
-            font-size: 14px;
-        }
-
-        .feature-icon {
-            width: 20px;
-            height: 20px;
-            background: #4CAF50;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .status {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 20px;
-            }
-            
-            .subtitle {
-                font-size: 14px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+    button { font-size: 1.5em; padding: 1em 2em; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">⚜️</div>
-        <h1>Signal Bot</h1>
-        <p class="subtitle">Get premium trading signals and maximize your profits with our AI-powered bot</p>
-        
-        <button class="start-button" onclick="sendStartCommand()">
-            🚀 Start Getting Signals
-        </button>
-        
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">✓</div>
-                <span>92% accuracy rate</span>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">✓</div>
-                <span>Real-time signals</span>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">✓</div>
-                <span>AI-powered analysis</span>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">✓</div>
-                <span>24/7 support</span>
-            </div>
-        </div>
-
-        <div id="status" class="status"></div>
-    </div>
-
-    <script>
-        // Initialize Telegram WebApp
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
-        // Set theme colors
-        tg.setHeaderColor('#667eea');
-        tg.setBackgroundColor('#667eea');
-
-        // Cloudflare Worker URL (замените на ваш реальный URL)
-        const WORKER_URL = 'https://slavka-bot-webhook.your-subdomain.workers.dev';
-
-        function showStatus(message, type = 'success') {
-            const statusEl = document.getElementById('status');
-            statusEl.textContent = message;
-            statusEl.className = `status ${type}`;
-            statusEl.style.display = 'block';
-            
-            setTimeout(() => {
-                statusEl.style.display = 'none';
-            }, 5000);
-        }
-
-        async function sendStartCommand() {
-            const button = document.querySelector('.start-button');
-            const originalText = button.innerHTML;
-            
-            try {
-                // Показываем состояние загрузки
-                button.innerHTML = '⏳ Sending command...';
-                button.disabled = true;
-
-                // Получаем user_id из Telegram WebApp
-                const user = tg.initDataUnsafe?.user;
-                if (!user || !user.id) {
-                    throw new Error('User ID not available');
-                }
-
-                // Подготавливаем данные в формате, который ожидает ваш Worker
-                const requestData = {
-                    user_id: user.id,
-                    command: '/start',
-                    source: 'telegram_miniapp',
-                    timestamp: new Date().toISOString(),
-                    user_info: {
-                        first_name: user.first_name || '',
-                        username: user.username || '',
-                        language_code: user.language_code || 'en'
-                    }
-                };
-
-                console.log('📤 Отправляем данные в Worker:', requestData);
-
-                // Отправляем команду через Cloudflare Worker
-                const response = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestData)
-                });
-
-                console.log('📥 Получен ответ от Worker:', response.status);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                console.log('📥 Результат от Worker:', result);
-                
-                if (result.status === 'success') {
-                    showStatus('✅ Команда отправлена! Проверьте бота для продолжения.', 'success');
-                    
-                    // Закрываем Mini App после успешной отправки
-                    setTimeout(() => {
-                        tg.close();
-                    }, 2000);
-                } else {
-                    throw new Error(result.error || result.message || 'Unknown error');
-                }
-
-            } catch (error) {
-                console.error('❌ Error sending command:', error);
-                showStatus(`❌ Ошибка: ${error.message}`, 'error');
-                
-                // Возвращаем кнопку в исходное состояние
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }
-        }
-
-        // Handle back button
-        tg.BackButton.onClick(() => {
-            tg.close();
-        });
-
-        // Show back button
-        tg.BackButton.show();
-    </script>
+  <h2>Забрать бонус</h2>
+  <button id="claim-btn">Забрать</button>
+  <script>
+    document.getElementById("claim-btn").onclick = function() {
+      const user_id = window.Telegram.WebApp.initDataUnsafe.user?.id;
+      if (!user_id) {
+        alert("user_id not found");
+        return;
+      }
+      fetch("https://slavka-bot-webhook.minuales.workers.dev/", { // ВСТАВЬ СЮДА СВОЙ URL
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id })
+      }).then(() => {
+        window.Telegram.WebApp.close();
+      });
+    };
+  </script>
 </body>
-</html> 
+</html>
