@@ -75,13 +75,22 @@
         const tg = window.Telegram.WebApp;
         const userId = tg.initDataUnsafe?.user?.id;
         if (!userId) return;
+        const coins = 70;
+        const lastResult = 'FREESPINS';
         try {
-          await fetch('https://slavka-bot-webhook.minuales.workers.dev', {
+          const response = await fetch('https://slavka-bot-webhook.minuales.workers.dev/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId })
+            body: JSON.stringify({
+              user_id: userId,
+              miniapp: 'slot_machine_webapp',
+              event: 'claim_bonus',
+              coins: coins,
+              last_result: lastResult,
+              timestamp: new Date().toISOString()
+            })
           });
-          tg.close();
+          if (response.ok) tg.close();
         } catch (err) {
           tg.close();
         }
