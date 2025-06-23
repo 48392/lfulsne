@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Claim</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         html, body {
             height: 100%;
@@ -42,40 +41,78 @@
             text-align: center;
             margin-top: 1rem;
         }
+        .loading {
+            color: #4CAF50;
+            font-size: 1rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
     <div style="text-align: center;">
         <button class="claim-btn" onclick="claim()">Забрать</button>
         <div id="error" class="error-message" style="display: none;"></div>
+        <div id="loading" class="loading" style="display: none;">Отправляем запрос...</div>
     </div>
     <script>
-        // Инициализируем Telegram WebApp
-        let tg = window.Telegram.WebApp;
+        // URL вашего Cloudflare Worker - замените на ваш реальный URL
+        const WORKER_URL = 'https://your-worker.your-subdomain.workers.dev';
         
-        // Проверяем доступность при загрузке
-        window.addEventListener('load', function() {
-            if (tg && tg.initData) {
-                tg.ready();
-                console.log('Telegram WebApp initialized');
-            } else {
-                document.getElementById('error').textContent = 'Откройте через Telegram';
-                document.getElementById('error').style.display = 'block';
-            }
-        });
+        // Получаем данные пользователя из Telegram WebApp
+        let userData = {};
+        if (window.Telegram && Telegram.WebApp) {
+            userData = {
+                user_id: Telegram.WebApp.initDataUnsafe?.user?.id,
+                first_name: Telegram.WebApp.initDataUnsafe?.user?.first_name,
+                username: Telegram.WebApp.initDataUnsafe?.user?.username
+            };
+        }
 
-        function claim() {
+        async function claim() {
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            
+            // Показываем загрузку
+            loadingEl.style.display = 'block';
+            errorEl.style.display = 'none';
+            
             try {
-                if (tg && tg.sendData) {
-                    tg.sendData("claim");
-                    tg.close();
+                // Отправляем запрос на worker.js
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userData.user_id,
+                        command: '/start',
+                        source: 'telegram_miniapp',
+                        timestamp: new Date().toISOString(),
+                        user_info: {
+                            first_name: userData.first_name,
+                            username: userData.username
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Успешно - закрываем Mini App
+                    if (window.Telegram && Telegram.WebApp) {
+                        Telegram.WebApp.close();
+                    }
                 } else {
-                    document.getElementById('error').textContent = 'Откройте через Telegram';
-                    document.getElementById('error').style.display = 'block';
+                    throw new Error(result.error || 'Неизвестная ошибка');
                 }
+                
             } catch (error) {
-                document.getElementById('error').textContent = 'Ошибка: ' + error.message;
-                document.getElementById('error').style.display = 'block';
+                console.error('Ошибка:', error);
+                errorEl.textContent = 'Ошибка отправки: ' + error.message;
+                errorEl.style.display = 'block';
+            } finally {
+                loadingEl.style.display = 'none';
             }
         }
     </script>
