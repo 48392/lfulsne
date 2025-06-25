@@ -1,11 +1,63 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Миниапп</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mini App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #1c1c1d; /* Telegram iOS Dark Theme Background */
+            color: #ffffff; /* Telegram iOS Dark Theme Text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        button {
+            background-color: #007aff; /* iOS Blue */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <!-- Подключение скрипта Telegram -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <h1>Миниапп</h1>
-  <button onclick="window.location.href='https://t.me/thtusuflsijdffi_bot?start'">Открыть бота в Telegram</button>
+    <div class="container">
+        <h1>Мое первое мини-приложение</h1>
+        <p>Нажмите кнопку ниже, чтобы продолжить в боте.</p>
+        <button id="claimButton">Забрать</button>
+    </div>
+
+    <script>
+        // Инициализируем Web App
+        Telegram.WebApp.ready();
+
+        const claimButton = document.getElementById('claimButton');
+
+        claimButton.addEventListener('click', function() {
+            // Отправляем данные боту. 'claimed_initial' - это наш ключ.
+            // Бот поймает это и отправит следующее сообщение.
+            Telegram.WebApp.sendData('claimed_initial');
+            
+            // После отправки данных Mini App автоматически закроется.
+            // Telegram.WebApp.close(); // Этот вызов даже не обязателен.
+        });
+    </script>
 </body>
 </html> 
