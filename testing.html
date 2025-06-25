@@ -1,96 +1,64 @@
-<!-- ... остальной код ... -->
-<body>
-    <div class="container">
-        <h1>Мое первое мини-приложение</h1>
-        <p>Нажмите кнопку ниже, чтобы продолжить в боте.</p>
-        <button id="claimButton">Забрать</button>
-    </div>
-
-    <script>
-        // Проверяем, что скрипт вообще запустился
-        alert('JavaScript запущен!'); 
-
-        try {
-            // Инициализируем Web App
-            Telegram.WebApp.ready();
-            alert('Telegram WebApp готов!');
-
-            const claimButton = document.getElementById('claimButton');
-            claimButton.addEventListener('click', function() {
-                alert('Кнопка "Забрать" нажата!');
-                try {
-                    // Отправляем данные боту.
-                    Telegram.WebApp.sendData('claimed_initial');
-                    alert('Данные отправлены!');
-                } catch (e) {
-                    alert('ОШИБКА при отправке данных: ' + e.message);
-                }
-            });
-        } catch (e) {
-            alert('ОШИБКА инициализации WebApp: ' + e.message);
-        }
-    </script>
-</body>
-</html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Mini App</title>
+    <title>Test Mini App - Robust</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #1c1c1d; /* Telegram iOS Dark Theme Background */
-            color: #ffffff; /* Telegram iOS Dark Theme Text */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-        }
-        .container {
-            padding: 20px;
-        }
-        button {
-            background-color: #007aff; /* iOS Blue */
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-size: 18px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s ease;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #1c1c1d; color: #ffffff; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+        .container { padding: 20px; }
+        button { background-color: #007aff; color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 18px; cursor: pointer; font-weight: bold; }
+        #status { margin-top: 20px; padding: 10px; background-color: #333; border-radius: 8px; font-family: monospace; }
     </style>
-    <!-- Подключение скрипта Telegram -->
+    <!-- 
+        Критически важный скрипт. Мы будем ждать его полной загрузки.
+    -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Мое первое мини-приложение</h1>
-        <p>Нажмите кнопку ниже, чтобы продолжить в боте.</p>
+        <h1>Отладка Mini App</h1>
+        <p>Нажмите кнопку ниже.</p>
         <button id="claimButton">Забрать</button>
+        <div id="status">Статус: Ожидание загрузки страницы...</div>
     </div>
 
     <script>
-        // Инициализируем Web App
-        Telegram.WebApp.ready();
+        // Этот код выполнится только ПОСЛЕ того, как вся страница,
+        // включая все скрипты (telegram-web-app.js), будет полностью загружена.
+        window.onload = function() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = 'Статус: Страница загружена.';
 
-        const claimButton = document.getElementById('claimButton');
+            try {
+                // Проверяем наличие объекта Telegram
+                if (window.Telegram && window.Telegram.WebApp) {
+                    statusDiv.textContent = 'Статус: Объект Telegram.WebApp найден!';
+                    
+                    const tg = window.Telegram.WebApp;
 
-        claimButton.addEventListener('click', function() {
-            // Отправляем данные боту. 'claimed_initial' - это наш ключ.
-            // Бот поймает это и отправит следующее сообщение.
-            Telegram.WebApp.sendData('claimed_initial');
-            
-            // После отправки данных Mini App автоматически закроется.
-            // Telegram.WebApp.close(); // Этот вызов даже не обязателен.
-        });
+                    // Инициализируем Web App
+                    tg.ready();
+                    statusDiv.textContent = 'Статус: WebApp готов. Можно нажимать кнопку.';
+
+                    const claimButton = document.getElementById('claimButton');
+                    claimButton.addEventListener('click', function() {
+                        statusDiv.textContent = 'Статус: Кнопка нажата. Отправляю данные...';
+                        // Отправляем данные боту
+                        tg.sendData('claimed_initial');
+                    });
+
+                } else {
+                    // Эта ошибка - наш главный подозреваемый
+                    statusDiv.textContent = 'ОШИБКА: Объект Telegram.WebApp НЕ найден.';
+                    alert('ОШИБКА: Объект window.Telegram.WebApp не определен, хотя страница полностью загрузилась. Проверьте, не блокируется ли скрипт telegram-web-app.js вашей сетью или расширениями браузера.');
+                }
+
+            } catch (e) {
+                statusDiv.textContent = 'КРИТИЧЕСКАЯ ОШИБКА: ' + e.message;
+                alert('КРИТИЧЕСКАЯ ОШИБКА: ' + e.message);
+            }
+        };
     </script>
 </body>
-</html> 
+</html>
