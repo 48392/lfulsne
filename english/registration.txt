@@ -1,0 +1,5 @@
+⚠️ Error: Registration failed!
+
+✦ When registering, be sure to enter the promo code - {promo}
+
+✦ After completing registration, you will automatically receive a notification from the bot. 
