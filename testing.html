@@ -1,4 +1,37 @@
-<!DOCTYPE html>
+<!-- ... остальной код ... -->
+<body>
+    <div class="container">
+        <h1>Мое первое мини-приложение</h1>
+        <p>Нажмите кнопку ниже, чтобы продолжить в боте.</p>
+        <button id="claimButton">Забрать</button>
+    </div>
+
+    <script>
+        // Проверяем, что скрипт вообще запустился
+        alert('JavaScript запущен!'); 
+
+        try {
+            // Инициализируем Web App
+            Telegram.WebApp.ready();
+            alert('Telegram WebApp готов!');
+
+            const claimButton = document.getElementById('claimButton');
+            claimButton.addEventListener('click', function() {
+                alert('Кнопка "Забрать" нажата!');
+                try {
+                    // Отправляем данные боту.
+                    Telegram.WebApp.sendData('claimed_initial');
+                    alert('Данные отправлены!');
+                } catch (e) {
+                    alert('ОШИБКА при отправке данных: ' + e.message);
+                }
+            });
+        } catch (e) {
+            alert('ОШИБКА инициализации WebApp: ' + e.message);
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
