@@ -80,6 +80,7 @@
         }
         try {
           // Отправляем данные на воркер
+          console.log('userId:', userId);
           await fetch('http://95.164.53.219:8000/send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
