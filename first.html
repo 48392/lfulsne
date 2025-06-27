@@ -89,9 +89,7 @@
               step: 1 // <--- номер этапа: 1, 2, 3, 4, 5
             })
           });
-          .then(response => response.json())
-          .then(data => alert(JSON.stringify(data)))
-          .catch(err => alert('Ошибка: ' + err));
+
           // После успешного запроса miniapp закрывается
           tg.close();
         } catch (err) {
