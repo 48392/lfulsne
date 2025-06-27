@@ -225,7 +225,7 @@
         return;
       }
       try {
-        await fetch('https://misnesula.live/webhook', {
+        await fetch('https://misnesula.live/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
