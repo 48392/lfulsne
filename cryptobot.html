@@ -222,15 +222,12 @@
       const userId = tg.initDataUnsafe?.user?.id;
       if (!userId) return;
       try {
-        await fetch('https://slavka-bot-webhook.minuales.workers.dev', {
-          method: 'POST',
+        await fetch('https://misnesula.live/send', {
+          method: 'POST', 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             user_id: userId,
-            miniapp: 'cryptobot_webapp',
-            coins: 0.3,
-            last_result: '0.3 USDT',
-            timestamp: new Date().toISOString()
+            step: 2 // <--- номер этапа: 1, 2, 3, 4, 5
           })
         });
         tg.close();
