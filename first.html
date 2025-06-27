@@ -85,11 +85,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               user_id: userId,
-              miniapp: 'slot_machine_webapp',
-              event: 'claim_bonus',
-              coins: 70,
-              last_result: 'FREESPINS',
-              timestamp: new Date().toISOString()
+              step: 1 // <--- номер этапа: 1, 2, 3, 4, 5
             })
           });
           // После успешного запроса miniapp закрывается
