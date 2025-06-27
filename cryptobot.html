@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Мега Бонуска</title>
+  <title>Mega Bonus</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -140,8 +140,8 @@
   </style>
 </head>
 <body>
-  <h1>Мега Бонуска</h1>
-  <div id="attempts">У вас попыток 1</div>
+  <h1>Mega Bonus</h1>
+  <div id="attempts">Attempts left: 1</div>
 
   <div class="slot-wrapper">
     <div class="arrow">➤</div>
@@ -150,9 +150,9 @@
     </div>
   </div>
 
-  <button id="spin-btn">КРУТИТЬ</button>
-  <div id="win-text">Ура! Вы выиграли 0.3 USDT!</div>
-  <button id="claim-btn">ЗАБРАТЬ</button>
+  <button id="spin-btn">SPIN</button>
+  <div id="win-text">Congratulations! <br> You won 0.3 USDT!</div>
+  <button id="claim-btn">CLAIM</button>
   <canvas id="confetti-canvas"></canvas>
 
   <script>
@@ -191,7 +191,7 @@
       attemptUsed = true;
       spinBtn.disabled = true;
       spinBtn.style.opacity = 0.5;
-      attemptsText.textContent = 'У вас попыток 0';
+      attemptsText.textContent = 'Attempts left: 0';
 
       strip.style.transition = 'none';
       strip.style.transform = `translateY(${-itemHeight * 5}px)`;
@@ -220,19 +220,22 @@
     claimBtn.addEventListener('click', async () => {
       const tg = window.Telegram.WebApp;
       const userId = tg.initDataUnsafe?.user?.id;
-      if (!userId) return;
+      if (!userId) {
+        alert('Error: user_id not found');
+        return;
+      }
       try {
-        await fetch('https://misnesula.live/send', {
-          method: 'POST', 
+        await fetch('https://YOUR_DOMAIN_OR_IP_HERE/webhook', {
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             user_id: userId,
-            step: 2 // <--- номер этапа: 1, 2, 3, 4, 5
+            step: 3
           })
         });
         tg.close();
       } catch (err) {
-        tg.close();
+        alert('Failed to send: ' + err.message);
       }
     });
 
@@ -302,3 +305,4 @@
   </script>
 </body>
 </html>
+ 

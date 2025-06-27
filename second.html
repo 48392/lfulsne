@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Колесо Удачи</title>
+  <title>Wheel of Fortune</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -163,8 +163,8 @@
   </style>
 </head>
 <body>
-  <h1>Мега Бонуска</h1>
-  <div id="attempts">У вас попыток: 1</div>
+  <h1>Wheel of Fortune</h1>
+  <div id="attempts">Attempts left: 1</div>
 
   <div class="slot-wrapper">
     <div class="arrow">➤</div>
@@ -173,9 +173,9 @@
     </div>
   </div>
 
-  <button id="spin-btn">КРУТИТЬ</button>
-  <div id="win-text">Поздравляем! Вы выиграли ШАНС X2!</div>
-  <button id="claim-btn">ЗАБРАТЬ</button>
+  <button id="spin-btn">SPIN</button>
+  <div id="win-text">Congratulations! You won CHANCE X3!</div>
+  <button id="claim-btn">CLAIM</button>
   <canvas id="confetti-canvas"></canvas>
 
   <script>
@@ -186,8 +186,8 @@
     const attemptsText = document.getElementById('attempts');
 
     const allValues = [
-      "ШАНС X2", "ВАУЧЕР НА 20 000₽", "+500% К ДЕПОЗИТУ", 
-      "БОНУСКА ЗА 32 000₽", "ШАНС Х3", "25 FP", "50 FP", "БОНУСКА ЗА 15 000₽"
+      "CHANCE X3", "VOUCHER FOR 50,000₽", "+500% TO DEPOSIT", 
+      "BONUS FOR 32,000₽", "CHANCE X2", "25 FS", "50 FS", "BONUS FOR 15,000₽"
     ];
 
     // Параметры слота
@@ -222,7 +222,7 @@
       attemptUsed = true;
       spinBtn.disabled = true;
       spinBtn.style.opacity = 0.5;
-      attemptsText.textContent = "У вас попыток: 0";
+      attemptsText.textContent = "Attempts left: 0";
 
       // Сброс перед анимацией
       strip.style.transition = 'none';
@@ -252,7 +252,7 @@
         // Находим все элементы с выигрышным значением и добавляем эффект свечения
         const items = strip.getElementsByClassName('slot-item');
         for (let item of items) {
-          if (item.textContent === "ШАНС X2") {
+          if (item.textContent === "CHANCE X3") {
             item.style.color = "#00ff99";
             item.style.fontWeight = "bold";
             item.style.textShadow = "0 0 10px rgba(0, 255, 153, 0.5)";
@@ -272,22 +272,22 @@
     claimBtn.addEventListener('click', async () => {
       const tg = window.Telegram.WebApp;
       const userId = tg.initDataUnsafe?.user?.id;
-      if (!userId) return;
+      if (!userId) {
+        alert('Error: user_id not found');
+        return;
+      }
       try {
-        await fetch('https://slavka-bot-webhook.minuales.workers.dev', {
+        await fetch('https://YOUR_DOMAIN_OR_IP_HERE/webhook', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             user_id: userId,
-            miniapp: 'second_webapp',
-            coins: 0,
-            last_result: 'ШАНС X2',
-            timestamp: new Date().toISOString()
+            step: 4
           })
         });
         tg.close();
       } catch (err) {
-        tg.close();
+        alert('Failed to send: ' + err.message);
       }
     });
 

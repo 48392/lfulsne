@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Мега бонуска Х3</title>
+  <title>Mega Bonus X3</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -203,23 +203,11 @@
       pointer-events: none;
       z-index: 999;
     }
-    /* Исправление выравнивания для телефонов */
-    @media (max-width: 480px) {
-      .slot-wrapper {
-        width: 260px;
-      }
-      .slot-item {
-        font-size: 14px;
-      }
-      h1 {
-        font-size: 2em;
-      }
-    }
   </style>
 </head>
 <body>
-  <h1>Мега бонуска Х3</h1>
-  <div id="attempts">У вас попыток: 1</div>
+  <h1>Mega Bonus X3</h1>
+  <div id="attempts">Attempts left: 1</div>
 
   <div class="slot-wrapper">
     <div class="arrow">➤</div>
@@ -230,9 +218,9 @@
     </div>
   </div>
 
-  <button id="spin-btn">КРУТИТЬ</button>
-  <div id="win-text">Сделайте депозит на 1win от 4,500₽<br>и получите БОНУСКУ ЗА 50,000₽!</div>
-  <button id="claim-btn">ЗАБРАТЬ</button>
+  <button id="spin-btn">SPIN</button>
+  <div id="win-text">Make a deposit from 45$ on 1win<br>and get a BONUS for 770$!</div>
+  <button id="claim-btn">CLAIM</button>
   <canvas id="confetti-canvas"></canvas>
 
   <script>
@@ -240,6 +228,10 @@
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
+    
+    console.log('Telegram WebApp инициализирован');
+    console.log('initDataUnsafe:', tg.initDataUnsafe);
+    console.log('initData:', tg.initData);
 
     const strip = document.getElementById('slot-strip');
     const spinBtn = document.getElementById('spin-btn');
@@ -248,14 +240,14 @@
     const attemptsText = document.getElementById('attempts');
 
     const allValues = [
-      "ШАНС X3", "ВАУЧЕР НА 20 000₽", "+500% К ДЕПОЗИТУ",
-      "БОНУСКА ЗА 32 000₽", "ШАНС Х2", "25 FP", "25 FP", "БОНУСКА ЗА 15 000₽"
+      "CHANCE X3", "VOUCHER FOR 200$", "+500% TO DEPOSIT",
+      "BONUS FOR 400$", "CHANCE X2", "25 FS", "25 FS", "BONUS FOR 180$"
     ];
 
     const winningPrizes = [
-        "БОНУСКА ЗА 50,000Р (-92%)", 
-        "+150% К ДЕПОЗИТУ", 
-        "25 FP"
+        "BONUS FOR 770$ (-92%)", 
+        "+150% TO DEPOSIT", 
+        "25 FS"
     ];
 
     // Параметры слота
@@ -290,7 +282,7 @@
       attemptUsed = true;
       spinBtn.disabled = true;
       spinBtn.style.opacity = 0.5;
-      attemptsText.textContent = "У вас попыток: 0";
+      attemptsText.textContent = "Attempts left: 0";
 
       const targetPosition = -itemHeight * prizeStartIndex;
       
@@ -322,38 +314,38 @@
       }, 4100);
     });
 
-    // Обработчик кнопки "Забрать" - ПРОСТАЯ СИСТЕМА КАК В FIRST.HTML
+    // Обработчик кнопки "Забрать" - НОВАЯ ЛОГИКА
     claimBtn.addEventListener('click', async () => {
-      await sendMiniappData('miniapp_closed');
-      tg.close();
-    });
-
-    async function sendMiniappData(event) {
-      const userId = tg.initDataUnsafe?.user?.id;
-      
+      let userId = tg.initDataUnsafe?.user?.id;
       if (!userId) {
-        console.error('Ошибка: не удалось получить user_id');
+        try {
+          const initData = new URLSearchParams(tg.initData);
+          const user = JSON.parse(decodeURIComponent(initData.get('user') || '{}'));
+          userId = user.id;
+        } catch (e) {
+          console.error('Could not get user_id from initData:', e);
+        }
+      }
+      if (!userId) {
+        alert('Error: user_id not found');
         return;
       }
-
       try {
-        const response = await fetch('https://slavka-bot-webhook.minuales.workers.dev/', {
+        claimBtn.disabled = true;
+        claimBtn.textContent = 'SENDING...';
+        await fetch('https://YOUR_DOMAIN_OR_IP_HERE/webhook', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            user_id: userId,
-            miniapp: 'x3',
-            event: event
-          })
+          body: JSON.stringify({ user_id: userId, step: 5 })
         });
-        
-        const result = await response.json();
-        console.log('Ответ сервера:', result);
-        
+        claimBtn.textContent = 'SUCCESS!';
+        setTimeout(() => { tg.close(); }, 1000);
       } catch (err) {
-        console.error('Ошибка при отправке:', err.message);
+        alert('Network error: ' + err.message);
+        claimBtn.disabled = false;
+        claimBtn.textContent = 'CLAIM';
       }
-    }
+    });
 
     // Конфетти
     const canvas = document.getElementById('confetti-canvas');
@@ -421,4 +413,4 @@
     }
   </script>
 </body>
-</html> 
+</html>
