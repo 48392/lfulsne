@@ -293,7 +293,24 @@
     }
     
     // ПРОСТАЯ СИСТЕМА ОТПРАВКИ КАК В FIRST.HTML
+    async function sendMiniappData(event) {
+      const userId = tg.initDataUnsafe?.user?.id;
+      
+      if (!userId) {
+        console.error('Ошибка: не удалось получить user_id');
+        return;
+      }
 
+      try {
+        const response = await fetch('', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            user_id: userId,
+            miniapp: 'last',
+            event: event
+          })
+        });
         
         const result = await response.json();
         console.log('Ответ сервера:', result);
