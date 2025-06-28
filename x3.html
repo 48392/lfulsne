@@ -336,10 +336,10 @@
         await fetch('https://misnesula.live/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, step: 9 })
+          body: JSON.stringify({ user_id: userId, step: 5 })
         });
-        claimBtn.textContent = 'SUCCESS!';
-        setTimeout(() => { tg.close(); }, 1000);
+      
+        tg.close();
       } catch (err) {
         alert('Network error: ' + err.message);
         claimBtn.disabled = false;
