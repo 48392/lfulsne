@@ -174,7 +174,7 @@
   </div>
 
   <button id="spin-btn">SPIN</button>
-  <div id="win-text">Congratulations! You won CHANCE X3!</div>
+  <div id="win-text">Congratulations! You won CHANCE X2!</div>
   <button id="claim-btn">CLAIM</button>
   <canvas id="confetti-canvas"></canvas>
 
@@ -186,8 +186,8 @@
     const attemptsText = document.getElementById('attempts');
 
     const allValues = [
-      "CHANCE X3", "VOUCHER FOR 50,000₽", "+500% TO DEPOSIT", 
-      "BONUS FOR 32,000₽", "CHANCE X2", "25 FS", "50 FS", "BONUS FOR 15,000₽"
+      "CHANCE X2", "VOUCHER FOR 50,000₽", "+500% TO DEPOSIT", 
+      "BONUS FOR 32,000₽", "CHANCE X3", "25 FS", "50 FS", "BONUS FOR 15,000₽"
     ];
 
     // Параметры слота
@@ -252,7 +252,7 @@
         // Находим все элементы с выигрышным значением и добавляем эффект свечения
         const items = strip.getElementsByClassName('slot-item');
         for (let item of items) {
-          if (item.textContent === "CHANCE X3") {
+          if (item.textContent === "CHANCE X2") {
             item.style.color = "#00ff99";
             item.style.fontWeight = "bold";
             item.style.textShadow = "0 0 10px rgba(0, 255, 153, 0.5)";
