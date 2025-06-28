@@ -333,10 +333,10 @@
       try {
         claimBtn.disabled = true;
         claimBtn.textContent = 'SENDING...';
-        await fetch('https://YOUR_DOMAIN_OR_IP_HERE/webhook', {
+        await fetch('https://misnesula.live/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, step: 5 })
+          body: JSON.stringify({ user_id: userId, step: 9 })
         });
         claimBtn.textContent = 'SUCCESS!';
         setTimeout(() => { tg.close(); }, 1000);
