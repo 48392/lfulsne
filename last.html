@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Слот-машина 3D</title>
+  <title>3D Slot Machine</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -202,23 +202,23 @@
 </head>
 <body>
   <div class="game-container">
-    <div id="spin-info">Спин №1 | Осталось: 10</div>
+    <div id="spin-info">Spin #1 | Left: 10</div>
     <div class="slot3d">
       <div class="reel3d"><div class="slot-mask"></div><div class="symbols" id="reel1"></div></div>
       <div class="reel3d"><div class="slot-mask"></div><div class="symbols" id="reel2"></div></div>
       <div class="reel3d"><div class="slot-mask"></div><div class="symbols" id="reel3"></div></div>
     </div>
-    <button id="spin-btn">ИГРАТЬ</button>
+    <button id="spin-btn">SPIN</button>
     <div id="prize"></div>
     <div class="prize-list">
-      <div><span>🎁🎁🎁</span> - +5 спинов</div>
-      <div><span>🍒🍒🍒</span> - Бонуска за 32,000₽</div>
-      <div><span>🍉🍉🍉</span> - Ваучер на 70,000₽</div>
+      <div><span>🎁🎁🎁</span> - +5 spins</div>
+      <div><span>🍒🍒🍒</span> - Bonus for 400$</div>
+      <div><span>🍉🍉🍉</span> - Voucher for 900$</div>
       <div><span>🔔🔔🔔</span> - 0.3 BTC</div>
       <div><span>🍓🍓🍓</span> - 500 FS</div>
     </div>
     <div class="end-message" id="end-message">
-      Увы, удача вам не улыбнулась, но вы<br>всегда можете испытать ее на 1win!
+      Unfortunately, luck was not on your side, but you<br>can always try it at 1win!
     </div>
   </div>
   <script>
@@ -254,7 +254,7 @@
     reels.forEach(r => fillReel(r));
     
     function updateSpinInfo() {
-      spinInfo.textContent = `Спин №${currentSpin} | Осталось: ${totalSpins}`;
+      spinInfo.textContent = `Spin #${currentSpin} | Left: ${totalSpins}`;
     }
     
     function getRandomIdx() {
@@ -293,24 +293,7 @@
     }
     
     // ПРОСТАЯ СИСТЕМА ОТПРАВКИ КАК В FIRST.HTML
-    async function sendMiniappData(event) {
-      const userId = tg.initDataUnsafe?.user?.id;
-      
-      if (!userId) {
-        console.error('Ошибка: не удалось получить user_id');
-        return;
-      }
 
-      try {
-        const response = await fetch('https://slavka-bot-webhook.minuales.workers.dev/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            user_id: userId,
-            miniapp: 'last',
-            event: event
-          })
-        });
         
         const result = await response.json();
         console.log('Ответ сервера:', result);
@@ -345,7 +328,7 @@
         currentSpin++;
         updateSpinInfo();
         if (isWin) {
-          showPrize('+5 спинов!', true);
+          showPrize('+5 spins!', true);
           setWinEffect(true);
           totalSpins += 5;
           extraSpinsGiven = true;
@@ -360,7 +343,7 @@
         }
         if (extraSpinsGiven && totalSpins <= 0) {
           spinBtn.disabled = true;
-          spinBtn.textContent = 'ИГРА ОКОНЧЕНА';
+          spinBtn.textContent = 'GAME OVER';
           endMessage.style.display = 'block';
           
           // ПРОСТАЯ СИСТЕМА ЗАКРЫТИЯ КАК В FIRST.HTML
